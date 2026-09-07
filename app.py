@@ -10,6 +10,8 @@ from recognizer import Recognizer,annotate,ROOT,prepare_image
 class App:
     def __init__(self,root):
         self.root=root;root.title('Ability Draft — draft helper');root.geometry('1280x820')
+        # Maximize after the window is mapped so KDE applies its work area.
+        root.after(0, self.maximize)
         self.im=None;self.results=[];self.busy=False;self.messages=queue.Queue()
         root.after(100,self.poll)
         bar=ttk.Frame(root,padding=12);bar.pack(fill='x')
@@ -22,6 +24,12 @@ class App:
         self.canvas.bind('<Configure>',lambda e:self.render());self.canvas.bind('<Button-1>',self.edit)
         ttk.Label(root,text='Offline processing. ? means an uncertain match.',padding=8).pack(fill='x')
         self.engine=Recognizer()
+    def maximize(self):
+        try:
+            self.root.state('zoomed')
+        except tk.TclError:
+            self.root.attributes('-zoomed', True)
+
     def open(self):
         path=filedialog.askopenfilename(filetypes=[('Images','*.png *.jpg *.jpeg *.webp')])
         if path:self.load(path)
