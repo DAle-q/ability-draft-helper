@@ -9,6 +9,38 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent
 REFERENCE = (2048, 1018)
 BOARD = (640, 115, 1440, 814)
+LAYOUT_PATH = ROOT/'data/layout.json'
+
+
+def default_board_coordinates():
+    """Return the 60 default pixel centres in drawing order."""
+    ultimate_x = [398, 527, 656, 785, 914, 1042]
+    first_row_x = [310, 440, 555, 670, 800, 920, 1035, 1155]
+    grid_x = [290, 418, 548, 677, 878, 1007, 1136, 1260]
+    rows = [(ultimate_x, [188, 322], 'ultimate'),
+            (first_row_x, [425], 'standard'),
+            (grid_x, [550, 675], 'standard'),
+            (grid_x, [813, 940, 1065], 'standard')]
+    return [(x, y, kind) for xs, ys, kind in rows for y in ys for x in xs]
+
+
+def board_coordinates():
+    """Read 60 manually editable centres, falling back safely if invalid."""
+    defaults = default_board_coordinates()
+    try:
+        data = json.loads(LAYOUT_PATH.read_text())
+        values = data['slots']
+        if len(values) != len(defaults):
+            raise ValueError
+        coords = []
+        for i, value in enumerate(values):
+            x, y = int(value['x']), int(value['y'])
+            if x < 0 or y < 0:
+                raise ValueError
+            coords.append((x, y, defaults[i][2]))
+        return coords
+    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
+        return defaults
 
 
 def atomic_json(path, data):
@@ -35,31 +67,18 @@ def crop_board(im):
 
 def slots(w, h, mode='full'):
     if mode == 'board':
-        # Fixed pixel template for the 1434x1109 board capture. The game lays
-        # these tiles out at stable screen coordinates; no adaptive spacing is
-        # applied here.
-        ultimate_x = [398, 527, 656, 785, 914, 1042]
-        # The first standard row is calibrated independently from the lower
-        # rows.  Its six skills sit closer to the centre than the old generic
-        # 8-column template, with one hero tile at either edge.
-        first_row_x = [310, 440, 555, 670, 800, 920, 1035, 1155]
-        # Keep the remaining rows available for the normal recognizer; the
-        # calibration template can deliberately show only the first row.
-        grid_x = [290, 418, 548, 677, 878, 1007, 1136, 1260]
-        rows = [(ultimate_x, [188, 322], 'ultimate'),
-                (first_row_x, [425], 'standard'),
-                (grid_x, [550, 675], 'standard'),
-                (grid_x, [813, 940, 1065], 'standard')]
+        # Fixed pixel template for the 1434x1109 board capture. Every centre
+        # can be edited independently in data/layout.json.
+        coordinates = board_coordinates()
         result=[]; i=0
-        for xs, ys, kind in rows:
-            for y in ys:
-                for j, x in enumerate(xs):
-                    actual_kind = 'hero' if kind == 'standard' and j in (0, 7) else kind
-                    result.append({'slot': i, 'x': x*w/1434, 'y': y*h/1109,
-                                   'kind': actual_kind, 'hero': actual_kind == 'hero',
-                                   'sx': w/1434, 'sy': h/1109,
-                                   })
-                    i += 1
+        for x, y, kind in coordinates:
+            j = (i - 12) % 8 if kind == 'standard' else 0
+            actual_kind = 'hero' if kind == 'standard' and j in (0, 7) else kind
+            result.append({'slot': i, 'x': x*w/1434, 'y': y*h/1109,
+                           'kind': actual_kind, 'hero': actual_kind == 'hero',
+                           'sx': w/1434, 'sy': h/1109,
+                           })
+            i += 1
         return result
     coords = []
     for y in [166, 263]:
