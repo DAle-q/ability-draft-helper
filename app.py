@@ -14,7 +14,7 @@ STATE=ROOT/'state'
 
 class App:
     def __init__(self, root, engine=None):
-        self.root=root; root.title('Ability Draft — помощник драфта'); root.geometry('1000x940')
+        self.root=root; root.title('Ability Draft — draft helper'); root.geometry('1000x940')
         self.im=None; self.original=None; self.results=[]; self.busy=False; self.messages=queue.Queue()
         self.engine=engine or Recognizer(); self.selecting=False; self.drag_start=None; self.seen=None; self.seen_error=None
         self.display=None; self.render_job=None; self.source_for_capture=False; self.editing=False
@@ -24,20 +24,20 @@ class App:
             try:self.seen=json.loads(consumed.read_text()).get('id')
             except (OSError,ValueError):pass
         bar=ttk.Frame(root,padding=10); bar.pack(fill='x')
-        self.openbutton=ttk.Button(bar,text='Открыть скриншот…',command=self.open); self.openbutton.pack(side='left')
-        self.regionbutton=ttk.Button(bar,text='Выделить сетку',command=self.begin_selection,state='disabled'); self.regionbutton.pack(side='left',padx=8)
-        self.savebutton=ttk.Button(bar,text='Сохранить PNG…',command=self.save,state='disabled'); self.savebutton.pack(side='left')
-        ttk.Button(bar,text='Сбросить область захвата',command=self.reset_capture).pack(side='left',padx=8)
+        self.openbutton=ttk.Button(bar,text='Open screenshot…',command=self.open); self.openbutton.pack(side='left')
+        self.regionbutton=ttk.Button(bar,text='Select board',command=self.begin_selection,state='disabled'); self.regionbutton.pack(side='left',padx=8)
+        self.savebutton=ttk.Button(bar,text='Save PNG…',command=self.save,state='disabled'); self.savebutton.pack(side='left')
+        ttk.Button(bar,text='Reset capture area',command=self.reset_capture).pack(side='left',padx=8)
         ttk.Label(bar,text='7.41d · Meta+F8').pack(side='right')
-        self.status=tk.StringVar(value='Открой скриншот или нажми Meta+F8 в Dota. Исправления иконок запоминаются.')
+        self.status=tk.StringVar(value='Open a screenshot or press Meta+F8 in Dota. Icon corrections are remembered.')
         ttk.Label(root,textvariable=self.status,padding=8,wraplength=950).pack(fill='x')
-        self.summary=tk.StringVar(value='Золотая рамка — лучшая ульта. Голубые — три лучших обычных скилла.')
+        self.summary=tk.StringVar(value='Gold frame = best ultimate. Cyan frames = three best standard abilities.')
         ttk.Label(root,textvariable=self.summary,padding=8,wraplength=950).pack(fill='x')
         self.canvas=tk.Canvas(root,bg='#121923',highlightthickness=0); self.canvas.pack(fill='both',expand=True)
         self.canvas.bind('<Configure>',self.schedule_render); self.canvas.bind('<ButtonPress-1>',self.mouse_down)
         self.canvas.bind('<B1-Motion>',self.mouse_move); self.canvas.bind('<ButtonRelease-1>',self.mouse_up)
         root.bind('<Escape>',lambda e:self.cancel_selection())
-        ttk.Label(root,text='Рейтинг среди распознанных и доступных скиллов. «?» — проверьте вручную. Полные скриншоты в Git не сохраняются.',padding=8).pack(fill='x')
+        ttk.Label(root,text='Ranking among recognized available abilities. “?” means manual review needed. Full screenshots are never stored in Git.',padding=8).pack(fill='x')
         root.after(100,self.poll)
 
     def reset_capture(self):
@@ -45,7 +45,7 @@ class App:
         settings=json.loads(path.read_text()) if path.exists() else {}
         settings.pop('captureRect',None);settings.pop('sourceAspect',None)
         atomic_json(path,settings)
-        self.status.set('Область сброшена. Вернись в Dota и нажми Meta+F8, затем выдели всю сетку заново.')
+        self.status.set('Capture area reset. Return to Dota and press Meta+F8, then select the whole board.')
 
     def open(self):
         path=filedialog.askopenfilename(filetypes=[('Изображения','*.png *.jpg *.jpeg *.webp')])
@@ -56,7 +56,7 @@ class App:
         try:
             with Image.open(path) as im: self.original=im.convert('RGB')
         except Exception as exc:
-            self.failed('Не удалось открыть: '+str(exc)); return
+            self.failed('Could not open: '+str(exc)); return
         self.source_for_capture=from_capture and mode=='calibrate'
         self.results=[]; self.regionbutton.config(state='normal')
         if mode=='auto':
@@ -69,7 +69,7 @@ class App:
 
     def run_recognition(self):
         self.busy=True; self.openbutton.config(state='disabled'); self.regionbutton.config(state='disabled'); self.savebutton.config(state='disabled')
-        self.status.set('Распознаю иконки…'); self.display=self.im; self.render()
+        self.status.set('Recognizing icons…'); self.display=self.im; self.render()
         image=self.im.copy()
         def work():
             try:self.messages.put(('done',self.engine.recognize(image,'board')))
@@ -100,7 +100,7 @@ class App:
                     error=json.loads(error_file.read_text())
                     if error['id']!=self.seen_error:
                         self.seen_error=error['id']; self.status.set('Ошибка захвата: '+error['error'])
-            except (OSError,ValueError,KeyError) as exc:self.status.set('Ошибка входящего снимка: '+str(exc))
+            except (OSError,ValueError,KeyError) as exc:self.status.set('Incoming screenshot error: '+str(exc))
         self.root.after(150,self.poll)
 
     def failed(self,error):
@@ -110,12 +110,12 @@ class App:
         self.results=results; self.busy=False; self.openbutton.config(state='normal'); self.regionbutton.config(state='normal'); self.savebutton.config(state='normal')
         self.display=annotate(self.im,results); self.render()
         n=sum(r['accepted'] for r in results)
-        self.status.set(f'Подписано {n}/60 · Сохранено образцов: {len(self.engine.examples)}. Нажми на иконку, чтобы выбрать и запомнить название.')
+        self.status.set(f'Recognized {n}/60 · Saved examples: {len(self.engine.examples)}. Click an icon to choose and remember its name.')
         selected=recommendations(results)
         ult=[r for r in results if r['slot'] in selected and r['kind']=='ultimate']
         normal=sorted([r for r in results if r['slot'] in selected and r['kind']=='standard'],key=lambda r:selected[r['slot']])
         text=lambda r:f"{r['name']} {r['winrate']*100:.1f}%"
-        self.summary.set('Ульта: '+(', '.join(map(text,ult)) or 'нет подтверждённых')+'\nСкиллы: '+(' · '.join(map(text,normal)) or 'нет подтверждённых'))
+        self.summary.set('Best ultimate: '+(', '.join(map(text,ult)) or 'none confirmed')+'\nBest skills: '+(' · '.join(map(text,normal)) or 'none confirmed'))
 
     def schedule_render(self,event=None):
         if self.render_job:self.root.after_cancel(self.render_job)
@@ -133,21 +133,21 @@ class App:
         if not self.results or self.selecting:return
         path=filedialog.asksaveasfilename(defaultextension='.png',initialfile='ability-draft.png',filetypes=[('PNG','*.png')])
         if path:
-            try:annotate(self.im,self.results).save(path); self.status.set('Сохранено: '+path)
-            except Exception as exc:messagebox.showerror('Ошибка сохранения',str(exc))
+            try:annotate(self.im,self.results).save(path); self.status.set('Saved: '+path)
+            except Exception as exc:messagebox.showerror('Save error',str(exc))
 
     def begin_selection(self):
         if self.original is None or self.busy:return
         self.selecting=True; self.display=self.original; self.render(); self.savebutton.config(state='disabled'); self.openbutton.config(state='disabled')
-        self.status.set('Обведи всю доску с иконками: по ширине — от левого до правого края нижних портретов; по высоте — от верха рамок ульт до низа рамок скиллов. Esc — отмена.')
-        self.summary.set('Ориентир: прямоугольник от левого края нижних портретов до правого края нижних портретов; сверху начало рамок ульт, снизу конец рамок скиллов.')
+        self.status.set('Drag around the whole board: include the side hero portraits, from the top ultimate frames to the bottom standard frames. Esc cancels.')
+        self.summary.set('Select from the leftmost to rightmost side portraits, from the top ultimate frames to the bottom standard frames.')
 
     def cancel_selection(self):
         if not self.selecting:return
         self.selecting=False; self.openbutton.config(state='normal')
         if self.results:self.done(self.results)
         else:
-            self.display=self.im;self.render();self.status.set('Выделение отменено. Открой другой снимок или нажми «Выделить сетку».')
+            self.display=self.im;self.render();self.status.set('Выделение отменено. Открой другой снимок или нажми «Select board».')
 
     def image_point(self,event):
         return ((event.x-self.offset[0])/self.scale,(event.y-self.offset[1])/self.scale)
@@ -167,7 +167,7 @@ class App:
         x,y=self.drag_start; x2,y2=self.image_point(event); self.drag_start=None
         box=(max(0,round(min(x,x2))),max(0,round(min(y,y2))),min(self.original.width,round(max(x,x2))),min(self.original.height,round(max(y,y2))))
         if box[2]-box[0]<200 or box[3]-box[1]<200:
-            self.status.set('Область слишком маленькая. Выдели всю сетку, включая портреты героев.'); return
+            self.status.set('Area is too small. Include the whole board and side hero portraits.'); return
         self.apply_selection(box)
 
     def apply_selection(self,box):
@@ -188,9 +188,9 @@ class App:
             if event.widget is popup:
                 self.editing=False;self.openbutton.config(state='normal');self.regionbutton.config(state='normal')
         popup.bind('<Destroy>',closed)
-        popup.title('Выбрать и запомнить иконку');popup.geometry('520x540');popup.transient(self.root)
+        popup.title('Choose and remember icon');popup.geometry('520x540');popup.transient(self.root)
         preview=ImageTk.PhotoImage(icon_crop(self.im,r).resize((96,96)));label=ttk.Label(popup,image=preview);label.image=preview;label.pack(pady=6)
-        ttk.Label(popup,text='Предположение: '+r['name'],padding=6).pack()
+        ttk.Label(popup,text='Guess: '+r['name'],padding=6).pack()
         var=tk.StringVar();entry=ttk.Entry(popup,textvariable=var);entry.pack(fill='x',padx=12);entry.focus()
         listing=tk.Listbox(popup);listing.pack(fill='both',expand=True,padx=12,pady=8)
         rows=self.engine.choices(r['kind']);shown=[]
@@ -201,15 +201,15 @@ class App:
             if not listing.curselection():return
             row=shown[listing.curselection()[0]]
             try:self.engine.learn(self.im,r,row['abilityId'])
-            except Exception as exc:messagebox.showerror('Не удалось запомнить',str(exc),parent=popup);return
+            except Exception as exc:messagebox.showerror('Could not remember',str(exc),parent=popup);return
             r.update(name=row['name'],abilityId=row['abilityId'],winrate=row['winrate'],accepted=True,manual=True,source='learned');popup.destroy();self.done(self.results)
         def forget():
             try:self.engine.forget(self.im,r)
             except Exception as exc:messagebox.showerror('Ошибка',str(exc),parent=popup);return
             r.update(accepted=False);popup.destroy();self.done(self.results)
         var.trace_add('write',refresh);refresh();listing.bind('<Double-1>',lambda e:choose())
-        ttk.Button(popup,text='Выбрать и запомнить',command=choose).pack(side='left',padx=12,pady=8)
-        ttk.Button(popup,text='Забыть этот образец',command=forget).pack(side='right',padx=12,pady=8)
+        ttk.Button(popup,text='Choose and remember',command=choose).pack(side='left',padx=12,pady=8)
+        ttk.Button(popup,text='Forget this example',command=forget).pack(side='right',padx=12,pady=8)
 
 
 if __name__=='__main__':
