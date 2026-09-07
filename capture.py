@@ -16,8 +16,9 @@ def prepare_capture(im, settings):
     rect = settings.get('captureRect')
     ratio = settings.get('sourceAspect', 0)
     # Default layout for the user's 5120x1440 ultrawide Dota window.
-    if not rect and im.width/im.height > 3.0:
-        rect = [0.36, 0.05, 0.64, 0.95]
+    if im.width/im.height > 3.0 and (not rect or rect[3] > 0.85):
+        # The lower part of the game window is chat. Keep the draft board only.
+        rect = [0.36, 0.05, 0.64, 0.82]
         ratio = im.width / im.height
     if not rect or len(rect) != 4 or not ratio or abs(im.width/im.height-ratio) > .03:
         return im.copy(), 'calibrate'
