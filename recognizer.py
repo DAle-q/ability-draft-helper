@@ -175,15 +175,21 @@ def annotate(im, results):
     best = recommendations(results)
     for r in results:
         x=r['x']; y=r['y']
-        # Place every label below its icon center using the same anchor.
-        label_y = y + 25*r['sy']
+        # Compensate for the board's perspective: upper rows need a little more
+        # room below the icon, while lower rows need a little less.
+        if r['kind'] == 'ultimate':
+            correction = 10*r['sy'] if y < 360*r['sy'] else -4*r['sy']
+        elif r['kind'] == 'standard':
+            correction = 8*r['sy'] if y < 360*r['sy'] else -12*r['sy']
+        else:
+            correction = 0
+        label_y = y + 25*r['sy'] + correction
         if r['accepted']:
             text=f"{r['winrate']*100:.1f}%"
             color = '#8bf0b0' if r['winrate']>=.5 else '#ffbd83'
             if r['slot'] in best:
                 color = '#ffe173' if r['kind']=='ultimate' else '#64e9ff'
-                d.rounded_rectangle((x-27*r['sx'], y-27*r['sy'], x+27*r['sx'], y+36*r['sy']), radius=3*scale, outline=color, width=max(2,int(2*scale)))
-                d.text((x-23*r['sx'],y-25*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=max(1,int(scale)),stroke_fill='#101722')
+                d.text((x-12*r['sx'], y-23*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=max(1,int(scale)),stroke_fill='#101722')
             # Text only: no wide rectangle that can hide the icon. A dark outline keeps it readable.
             bbox=d.textbbox((0,0),text,font=font,stroke_width=max(1,int(2*scale))); tw=bbox[2]-bbox[0]
             d.text((x-tw/2,label_y-bbox[1]),text,font=font,fill=color,stroke_width=max(1,int(2*scale)),stroke_fill='#101722')
