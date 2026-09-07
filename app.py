@@ -84,10 +84,14 @@ class App:
             for row in shown:listing.insert('end',f"{row['name']} — {row['winrate']*100:.1f}%")
         def choose():
             if not listing.curselection():return
-            row=shown[listing.curselection()[0]];r.update(name=row['name'],abilityId=row['abilityId'],winrate=row['winrate'],accepted=True,manual=True);popup.destroy();self.done(self.results)
+            row=shown[listing.curselection()[0]]
+            try:self.engine.learn(self.im,r,row['abilityId'])
+            except Exception as exc:
+                messagebox.showerror('Could not save correction',str(exc),parent=popup);return
+            r.update(name=row['name'],abilityId=row['abilityId'],winrate=row['winrate'],accepted=True,manual=True);popup.destroy();self.done(self.results)
         def clear():r.update(accepted=False,manual=True);popup.destroy();self.done(self.results)
         var.trace_add('write',refresh);refresh();listing.bind('<Double-1>',lambda e:choose())
-        ttk.Button(popup,text='Choose',command=choose).pack(side='left',padx=12,pady=8);ttk.Button(popup,text='Keep ?',command=clear).pack(side='right',padx=12,pady=8)
+        ttk.Button(popup,text='Choose and save',command=choose).pack(side='left',padx=12,pady=8);ttk.Button(popup,text='Keep ?',command=clear).pack(side='right',padx=12,pady=8)
 
 if __name__=='__main__':
     import sys

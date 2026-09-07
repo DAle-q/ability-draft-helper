@@ -2,6 +2,7 @@
 from pathlib import Path
 import json
 import numpy as np
+from learning import Learning
 from PIL import Image, ImageDraw, ImageFont
 ROOT=Path(__file__).resolve().parent
 
@@ -50,14 +51,24 @@ def slots(w,h):
     return [(x*w/2048,y*h/1018,hero) for x,y,hero in coords]
 
 class Recognizer:
-    def __init__(self):
+    def __init__(self, learned_dir=None):
+        self.learning=Learning(learned_dir or ROOT/'data/learned-icons')
         data=json.loads((ROOT/'data/windrun-7.41d.json').read_text())
         manifest=json.loads((ROOT/'data/icon-manifest.json').read_text())
         rows={r['abilityId']:r for r in data['abilityStats']}
+        self.rows=rows
         self.groups={}
         for hero in [False,True]:
             entries=[m for m in manifest if m['status']=='ok' and (m['abilityId']<0)==hero]
             self.groups[hero]=([rows[m['abilityId']] for m in entries],np.stack([feature(Image.open(ROOT/m['path'])) for m in entries]))
+    def learn(self, im, result, ident):
+        scale=im.width/2048
+        x,y=result['x'],result['y']
+        crop=im.crop((x-24*scale,y-24*scale,x+24*scale,y+24*scale))
+        if np.asarray(crop).mean()/255 < .07:
+            raise ValueError('Cannot learn an empty or dark icon.')
+        self.learning.save(crop,ident,result['hero'])
+
     def recognize(self,im):
         im=im.convert('RGB'); w,h=im.size
         if abs(w/h-2048/1018)>.08: raise ValueError('Нужен полный скриншот драфта с соотношением сторон около 2:1. Обрезанные изображения пока не поддерживаются.')
@@ -75,6 +86,9 @@ class Recognizer:
             row=rows[idx]
             brightness=np.asarray(im.crop((x-18*scale,y-18*scale,x+18*scale,y+18*scale))).mean()/255
             accepted=score<(.22 if hero else .30) and margin>.065 and brightness>.07
+            learned=self.learning.match(samples,hero) if brightness>.07 else None
+            if learned is not None and learned in self.rows:
+                row=self.rows[learned];accepted=True
             result.append({'x':x,'y':y,'hero':hero,'accepted':bool(accepted),'score':round(score,4),'margin':round(margin,4),'abilityId':row['abilityId'],'name':row['name'],'winrate':row['winrate'],'candidates':[{'name':rows[int(k)]['name'],'winrate':rows[int(k)]['winrate'],'score':round(float(best[k]),4)} for k in order[:3]]})
             if player is not None:
                 result[-1]['player']=player
