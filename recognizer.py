@@ -24,8 +24,8 @@ def prepare_image(im):
 
 def side_slots(w,h):
     return [(x*w/2048, y*h/1018, False, team*5+row)
-            for team, xs in enumerate(([338,398,458,518], [1564,1624,1684,1744]))
-            for row,y in enumerate([235,400,565,730,895]) for x in xs]
+            for team, xs in enumerate(([330,390,450,510], [1572,1632,1692,1752]))
+            for row,y in enumerate([235,402,569,736,903]) for x in xs]
 
 def build_averages(results):
     groups = {}
