@@ -12,7 +12,28 @@ def prepare_image(im):
         left = im.width / 2 - 1042 * scale
         top = im.height * .025
         return im.crop((round(left), round(top), round(left + 2048*scale), round(top + 1018*scale)))
+    # A cropped board-and-players screenshot supplied for build review.
+    if abs(im.width/im.height - 2458/1355) < .005:
+        unit = im.width/2048
+        scale = 1.135*unit
+        canvas = Image.new('RGB', (round(2048*scale), round(1018*scale)), '#121923')
+        canvas.paste(im, (round(181*unit), round(42*unit)))
+        return canvas
     return im
+
+def side_slots(w,h):
+    return [(x*w/2048, y*h/1018, False, team*5+row)
+            for team, xs in enumerate(([338,398,458,518], [1564,1624,1684,1744]))
+            for row,y in enumerate([235,400,565,730,895]) for x in xs]
+
+def build_averages(results):
+    groups = {}
+    for r in results:
+        if 'player' in r:
+            groups.setdefault(r['player'], []).append(r)
+    return {player: (sum(r['winrate'] for r in items if r['accepted']) / n if n else None, n)
+            for player,items in groups.items()
+            for n in [sum(bool(r['accepted']) for r in items)]}
 
 def feature(im):
     a=np.asarray(im.resize((16,16),Image.Resampling.BILINEAR).convert('RGB'),dtype=np.float32)/255
@@ -41,7 +62,7 @@ class Recognizer:
         im=im.convert('RGB'); w,h=im.size
         if abs(w/h-2048/1018)>.08: raise ValueError('Нужен полный скриншот драфта с соотношением сторон около 2:1. Обрезанные изображения пока не поддерживаются.')
         result=[]; scale=w/2048
-        for x,y,hero in slots(w,h):
+        for x,y,hero,player in [(*v,None) for v in slots(w,h)] + side_slots(w,h):
             rows,templates=self.groups[hero]
             crops=[]; boxes=[]
             for size in [42,48,54,60]:
@@ -55,6 +76,8 @@ class Recognizer:
             brightness=np.asarray(im.crop((x-18*scale,y-18*scale,x+18*scale,y+18*scale))).mean()/255
             accepted=score<(.22 if hero else .30) and margin>.065 and brightness>.07
             result.append({'x':x,'y':y,'hero':hero,'accepted':bool(accepted),'score':round(score,4),'margin':round(margin,4),'abilityId':row['abilityId'],'name':row['name'],'winrate':row['winrate'],'candidates':[{'name':rows[int(k)]['name'],'winrate':rows[int(k)]['winrate'],'score':round(float(best[k]),4)} for k in order[:3]]})
+            if player is not None:
+                result[-1]['player']=player
         return result
 
 def winrate_color(rate):
@@ -84,6 +107,15 @@ def annotate(im,results):
         box=d.textbbox((0,0),text,font=font);tw=box[2];th=box[3]-box[1]
         d.rounded_rectangle((x-tw/2-5*scale,y,x+tw/2+5*scale,y+th+8*scale),radius=3*scale,fill='#121a24',outline=color)
         d.text((x-tw/2,y+3*scale-box[1]),text,font=font,fill=color)
+    for player,(average,count) in build_averages(results).items():
+        members=[r for r in results if r.get('player')==player]
+        x=min(r['x'] for r in members)-27*scale
+        y=members[0]['y']-58*scale
+        text=(f"AVG {average*100:.1f}%" if average is not None else 'AVG --')+f"  {count}/4"
+        color=winrate_color(average) if average is not None else '#d5d9df'
+        box=d.textbbox((0,0),text,font=font);tw=box[2];th=box[3]-box[1]
+        d.rounded_rectangle((x-5*scale,y,x+tw+5*scale,y+th+8*scale),radius=3*scale,fill='#121a24',outline=color)
+        d.text((x,y+3*scale-box[1]),text,font=font,fill=color)
     return out
 
 if __name__=='__main__':

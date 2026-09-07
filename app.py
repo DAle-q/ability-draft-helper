@@ -48,7 +48,7 @@ class App:
         self.busy=False;self.openbutton.config(state='normal');self.status.set(error)
     def done(self,results):
         self.results=results;self.busy=False;self.openbutton.config(state='normal');self.savebutton.config(state='normal');self.render()
-        n=sum(r['accepted'] for r in results);self.status.set(f'Recognized {n} of {len(results)}. Click an icon to correct it.')
+        n=sum(r['accepted'] for r in results);self.status.set(f'Recognized {n} of {len(results)}. AVG = mean skill win rate, not build win chance. Click an icon to correct it.')
     def render(self):
         if self.im is None:return
         out=annotate(self.im,self.results);w=max(1,self.canvas.winfo_width());h=max(1,self.canvas.winfo_height());self.scale=min(w/out.width,h/out.height)
