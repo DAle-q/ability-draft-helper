@@ -49,18 +49,22 @@ def slots(w, h, mode='full'):
                     actual_kind = 'hero' if kind == 'standard' and j in (0, 7) else kind
                     # Hand-calibrated offsets from the user's marked template.
                     # Values are in template pixels (1494x1158) and scale with the crop.
-                    if i in {0,1,2,6,7,8}:
-                        dx, dy = 14, 20
-                    elif i in {3,4,5,9,10,11}:
-                        dx, dy = -14, 20
+                    if i in {0,1,2}:
+                        dx, dy = 28, 40
+                    elif i in {3,4,5}:
+                        dx, dy = -28, 40
+                    elif i in {6,7,8}:
+                        dx, dy = 28, -15
+                    elif i in {9,10,11}:
+                        dx, dy = -28, -15
                     elif i in {13,14,15,21,22,23,29,30,31,37,38,39,45,46,47,53,54,55}:
-                        dx, dy = 10, 4
+                        dx, dy = 20, -15
                     elif i in {16,17,18,24,25,26,32,33,34,40,41,42,48,49,50,56,57,58}:
-                        dx, dy = -10, 4
+                        dx, dy = -20, -15
                     elif i in {12,20,28,36,44,52}:
-                        dx, dy = 21, 3
+                        dx, dy = 35, -12
                     elif i in {19,27,35,43,51,59}:
-                        dx, dy = -21, 3
+                        dx, dy = -35, -12
                     else:
                         dx, dy = 0, 0
                     result.append({'slot': i, 'x': x*w/1494, 'y': y*h/1158,
