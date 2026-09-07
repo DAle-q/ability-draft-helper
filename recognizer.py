@@ -57,13 +57,29 @@ class Recognizer:
             result.append({'x':x,'y':y,'hero':hero,'accepted':bool(accepted),'score':round(score,4),'margin':round(margin,4),'abilityId':row['abilityId'],'name':row['name'],'winrate':row['winrate'],'candidates':[{'name':rows[int(k)]['name'],'winrate':rows[int(k)]['winrate'],'score':round(float(best[k]),4)} for k in order[:3]]})
         return result
 
+def winrate_color(rate):
+    """Continuous color scale: <=45 red, 48 orange, 50 yellow, >=55 green."""
+    stops = [(0.45, (255, 148, 148)), (0.48, (255, 179, 71)),
+             (0.50, (255, 232, 92)), (0.55, (71, 255, 117))]
+    if rate <= stops[0][0]:
+        rgb = stops[0][1]
+    elif rate >= stops[-1][0]:
+        rgb = stops[-1][1]
+    else:
+        for (lo, a), (hi, b) in zip(stops, stops[1:]):
+            if lo <= rate <= hi:
+                t = (rate - lo) / (hi - lo)
+                rgb = tuple(round(x + (y-x)*t) for x, y in zip(a, b))
+                break
+    return '#%02x%02x%02x' % rgb
+
 def annotate(im,results):
     out=im.convert('RGB').copy();d=ImageDraw.Draw(out);scale=im.width/2048
     try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(12,int(15*scale)))
     except OSError: font=ImageFont.load_default(size=max(12,int(15*scale)))
     for r in results:
         text=f"{r['winrate']*100:.1f}%" if r['accepted'] else '?'
-        color=('#8bf0b0' if r['winrate']>=.5 else '#ffbd83') if r['accepted'] else '#d5d9df'
+        color=winrate_color(r['winrate']) if r['accepted'] else '#d5d9df'
         x=r['x'];y=r['y']+22*scale
         box=d.textbbox((0,0),text,font=font);tw=box[2];th=box[3]-box[1]
         d.rounded_rectangle((x-tw/2-5*scale,y,x+tw/2+5*scale,y+th+8*scale),radius=3*scale,fill='#121a24',outline=color)
