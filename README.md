@@ -49,6 +49,8 @@ python3 -m unittest discover -s tests -v
 python3 tests/gui_smoke.py /path/to/private-test-screenshot.png
 python3 recognizer.py screenshot.png --output outputs/annotated.png
 python3 recognizer.py board.png --mode board --output outputs/board.png
+# Pixel template for the first standard row (6 skills + 2 hero tiles)
+python3 template.py /path/to/board.png --only-first-row --output outputs/first-row-template.png
 ```
 
 Графическая проверка требует рабочего дисплея и исходного тестового скриншота; он не включён в репозиторий. Проверяются обучение, перенос иконки между слотами, перезапуск, исправление ошибочной метки, ранжирование, калибровка и доставка снимков в окно. Физическое нажатие клавиши и захват конкретной игры этими тестами не проверяются.

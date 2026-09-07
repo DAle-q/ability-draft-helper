@@ -4,19 +4,19 @@ import argparse
 from PIL import Image, ImageDraw, ImageFont
 from recognizer import slots
 
-p=argparse.ArgumentParser();p.add_argument('input');p.add_argument('--output',default='outputs/grid-template.png');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('input');p.add_argument('--output',default='outputs/grid-template.png');p.add_argument('--only-first-row',action='store_true');a=p.parse_args()
 im=Image.open(a.input).convert('RGB'); out=im.copy(); d=ImageDraw.Draw(out); w,h=im.size
 try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(12,int(16*min(w/1494,h/1158))))
 except OSError: font=ImageFont.load_default()
-for r in slots(w,h,'board'):
+all_slots=slots(w,h,'board')
+draw_slots=[r for r in all_slots if not a.only_first_row or 12 <= r['slot'] <= 19]
+for r in draw_slots:
     x,y,sx,sy=(r[k] for k in ('x','y','sx','sy'))
-    # Tile-shaped quadrilateral: slightly narrower at the top, following the board's perspective.
+    # Keep this first-row pass pixel-readable: one thin box per tile, with no
+    # filled overlay and no label covering the icon.
     half={'ultimate':37, 'standard':39, 'hero':37}[r['kind']]
     hw,hh=half*sx,half*sy
-    skew=(6*sx if y < h*.45 else 3*sx)
-    # Mirror the slant on the right side of the board.
-    sign = -1 if x > w*.5 else 1
-    poly=[(x-hw+sign*skew,y-hh),(x+hw+sign*skew,y-hh),(x+hw-sign*skew,y+hh),(x-hw-sign*skew,y+hh)]
+    poly=[(x-hw,y-hh),(x+hw,y-hh),(x+hw,y+hh),(x-hw,y+hh)]
     color={'ultimate':'#ffd54a','standard':'#43d7ff','hero':'#c0c0c0'}[r['kind']]
     d.line(poly+[poly[0]],fill=color,width=max(2,int(2*sx)))
     label=str(r['slot']+1); bb=d.textbbox((0,0),label,font=font); tw=bb[2]-bb[0];th=bb[3]-bb[1]

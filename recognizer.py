@@ -39,9 +39,16 @@ def slots(w, h, mode='full'):
         # these tiles out at stable screen coordinates; no adaptive spacing is
         # applied here.
         ultimate_x = [398, 527, 656, 785, 914, 1042]
+        # The first standard row is calibrated independently from the lower
+        # rows.  Its six skills sit closer to the centre than the old generic
+        # 8-column template, with one hero tile at either edge.
+        first_row_x = [310, 440, 555, 670, 800, 920, 1035, 1155]
+        # Keep the remaining rows available for the normal recognizer; the
+        # calibration template can deliberately show only the first row.
         grid_x = [290, 418, 548, 677, 878, 1007, 1136, 1260]
         rows = [(ultimate_x, [188, 322], 'ultimate'),
-                (grid_x, [425, 550, 675], 'standard'),
+                (first_row_x, [425], 'standard'),
+                (grid_x, [550, 675], 'standard'),
                 (grid_x, [813, 940, 1065], 'standard')]
         result=[]; i=0
         for xs, ys, kind in rows:
