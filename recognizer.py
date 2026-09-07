@@ -35,45 +35,23 @@ def crop_board(im):
 
 def slots(w, h, mode='full'):
     if mode == 'board':
-        # Perspective-calibrated centers measured on the cropped draft board.
-        # The crop is scaled from 1494x1158, so this also works at other sizes.
-        ultimate_x = [365, 493, 623, 752, 881, 1010]
-        grid_x = [241, 365, 495, 623, 824, 953, 1081, 1211]
-        rows = [(ultimate_x, [144, 299], 'ultimate'),
-                (grid_x, [422, 544, 667], 'standard'),
-                (grid_x, [803, 923, 1040], 'standard')]
+        # Fixed pixel template for the 1434x1109 board capture. The game lays
+        # these tiles out at stable screen coordinates; no adaptive spacing is
+        # applied here.
+        ultimate_x = [398, 527, 656, 785, 914, 1042]
+        grid_x = [290, 418, 548, 677, 878, 1007, 1136, 1260]
+        rows = [(ultimate_x, [188, 322], 'ultimate'),
+                (grid_x, [425, 550, 675], 'standard'),
+                (grid_x, [813, 940, 1065], 'standard')]
         result=[]; i=0
         for xs, ys, kind in rows:
             for y in ys:
                 for j, x in enumerate(xs):
                     actual_kind = 'hero' if kind == 'standard' and j in (0, 7) else kind
-                    # Hand-calibrated offsets from the user's marked template.
-                    # Values are in template pixels (1494x1158) and scale with the crop.
-                    if i in {0,1,2}:
-                        dx, dy = 28, 40
-                    elif i in {3,4,5}:
-                        dx, dy = -28, 40
-                    elif i in {6,7,8}:
-                        dx, dy = 28, -15
-                    elif i in {9,10,11}:
-                        dx, dy = -28, -15
-                    elif i in {13,14,15,21,22,23,29,30,31,37,38,39,45,46,47,53,54,55}:
-                        dx, dy = 20, -15
-                    elif i in {16,17,18,24,25,26,32,33,34,40,41,42,48,49,50,56,57,58}:
-                        dx, dy = -20, -15
-                    elif i in {12,20,28,36,44,52}:
-                        dx, dy = 35, -12
-                    elif i in {19,27,35,43,51,59}:
-                        dx, dy = -35, -12
-                    else:
-                        dx, dy = 0, 0
-                    result.append({'slot': i, 'x': x*w/1494, 'y': y*h/1158,
+                    result.append({'slot': i, 'x': x*w/1434, 'y': y*h/1109,
                                    'kind': actual_kind, 'hero': actual_kind == 'hero',
-                                   'sx': w/1494, 'sy': h/1158,
-                                   'offset_x': dx, 'offset_y': dy,
+                                   'sx': w/1434, 'sy': h/1109,
                                    })
-                    result[-1]['x'] += dx*w/1494
-                    result[-1]['y'] += dy*h/1158
                     i += 1
         return result
     coords = []
@@ -216,15 +194,8 @@ def annotate(im, results):
     best = recommendations(results)
     for r in results:
         x=r['x']; y=r['y']
-        # Compensate for the board's perspective: upper rows need a little more
-        # room below the icon, while lower rows need a little less.
-        if r['kind'] == 'ultimate':
-            correction = 10*r['sy'] if y < 360*r['sy'] else -4*r['sy']
-        elif r['kind'] == 'standard':
-            correction = 8*r['sy'] if y < 360*r['sy'] else -12*r['sy']
-        else:
-            correction = 0
-        label_y = y + 25*r['sy'] + correction
+        # Fixed pixel anchor: every label belongs to the same tile edge.
+        label_y = y + 45*r['sy']
         if r['accepted']:
             text=f"{r['winrate']*100:.1f}%"
             color = '#8bf0b0' if r['winrate']>=.5 else '#ffbd83'
