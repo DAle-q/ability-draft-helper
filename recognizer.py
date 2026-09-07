@@ -5,6 +5,15 @@ import numpy as np
 from PIL import Image, ImageDraw, ImageFont
 ROOT=Path(__file__).resolve().parent
 
+def prepare_image(im):
+    """Normalize the centered ultrawide draft UI to the original reference."""
+    if im.width / im.height > 3:
+        scale = im.height / 1018 * .95
+        left = im.width / 2 - 1042 * scale
+        top = im.height * .025
+        return im.crop((round(left), round(top), round(left + 2048*scale), round(top + 1018*scale)))
+    return im
+
 def feature(im):
     a=np.asarray(im.resize((16,16),Image.Resampling.BILINEAR).convert('RGB'),dtype=np.float32)/255
     a=a.reshape(-1)
