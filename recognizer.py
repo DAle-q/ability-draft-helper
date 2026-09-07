@@ -9,38 +9,6 @@ from PIL import Image, ImageDraw, ImageFont
 ROOT = Path(__file__).resolve().parent
 REFERENCE = (2048, 1018)
 BOARD = (640, 115, 1440, 814)
-LAYOUT_PATH = ROOT/'data/layout.json'
-
-
-def default_board_coordinates():
-    """Return the 60 default pixel centres in drawing order."""
-    ultimate_x = [398, 527, 656, 785, 914, 1042]
-    first_row_x = [310, 440, 555, 670, 800, 920, 1035, 1155]
-    grid_x = [290, 418, 548, 677, 878, 1007, 1136, 1260]
-    rows = [(ultimate_x, [188, 322], 'ultimate'),
-            (first_row_x, [425], 'standard'),
-            (grid_x, [550, 675], 'standard'),
-            (grid_x, [813, 940, 1065], 'standard')]
-    return [(x, y, kind) for xs, ys, kind in rows for y in ys for x in xs]
-
-
-def board_coordinates():
-    """Read 60 manually editable centres, falling back safely if invalid."""
-    defaults = default_board_coordinates()
-    try:
-        data = json.loads(LAYOUT_PATH.read_text())
-        values = data['slots']
-        if len(values) != len(defaults):
-            raise ValueError
-        coords = []
-        for i, value in enumerate(values):
-            x, y = int(value['x']), int(value['y'])
-            if x < 0 or y < 0:
-                raise ValueError
-            coords.append((x, y, defaults[i][2]))
-        return coords
-    except (OSError, ValueError, KeyError, TypeError, json.JSONDecodeError):
-        return defaults
 
 
 def atomic_json(path, data):
@@ -66,20 +34,6 @@ def crop_board(im):
 
 
 def slots(w, h, mode='full'):
-    if mode == 'board':
-        # Fixed pixel template for the 1434x1109 board capture. Every centre
-        # can be edited independently in data/layout.json.
-        coordinates = board_coordinates()
-        result=[]; i=0
-        for x, y, kind in coordinates:
-            j = (i - 12) % 8 if kind == 'standard' else 0
-            actual_kind = 'hero' if kind == 'standard' and j in (0, 7) else kind
-            result.append({'slot': i, 'x': x*w/1434, 'y': y*h/1109,
-                           'kind': actual_kind, 'hero': actual_kind == 'hero',
-                           'sx': w/1434, 'sy': h/1109,
-                           })
-            i += 1
-        return result
     coords = []
     for y in [166, 263]:
         for x in [807, 900, 995, 1090, 1184, 1278]:
@@ -87,7 +41,7 @@ def slots(w, h, mode='full'):
     for y, xs in [(338, [738,834,912,993,1095,1173,1250,1344]), (403, [727,829,909,992,1096,1175,1253,1353]), (472, [717,824,905,990,1098,1178,1258,1363]), (584, [703,815,901,987,1100,1184,1267,1378]), (667, [691,809,899,986,1102,1188,1274,1391]), (754, [678,804,897,985,1105,1193,1282,1405])]:
         for j, x in enumerate(xs):
             coords.append((x, y, 'hero' if j in (0, 7) else 'standard'))
-    ox, oy, bw, bh = (0, 0, *REFERENCE)
+    ox, oy, bw, bh = (0, 0, *REFERENCE) if mode == 'full' else (BOARD[0], BOARD[1], BOARD[2]-BOARD[0], BOARD[3]-BOARD[1])
     return [{'slot': i, 'x': (x-ox)*w/bw, 'y': (y-oy)*h/bh, 'kind': kind, 'hero': kind == 'hero', 'sx': w/bw, 'sy': h/bh} for i, (x, y, kind) in enumerate(coords)]
 
 
@@ -178,8 +132,8 @@ class Recognizer:
             x, y, sx, sy = (slot[k] for k in ('x','y','sx','sy'))
             templates, ids, sources = self.groups[slot['kind']]
             crops = []
-            for size in [34,40,46,52,58,64,72]:
-                for dx,dy in [(0,0),(-4,0),(4,0),(0,-4),(0,4),(-8,0),(8,0),(0,-8),(0,8),(-12,0),(12,0),(0,-12),(0,12)]:
+            for size in [42,48,54,60]:
+                for dx,dy in [(0,0),(-3,0),(3,0),(0,-3),(0,3)]:
                     shifted = {**slot, 'x': x+dx*sx, 'y': y+dy*sy}
                     crops.append(feature(icon_crop(im, shifted, size)))
             samples = np.stack(crops)
@@ -197,7 +151,7 @@ class Recognizer:
             brightness = float(np.asarray(icon_crop(im, slot, 36)).mean()/255)
             available = brightness > .07
             learned = sources[ti] == 'learned'
-            accepted = available and score < (.28 if learned else (.55 if slot['hero'] else .50)) and margin > (.018 if learned else .012)
+            accepted = available and score < (.16 if learned else (.22 if slot['hero'] else .30)) and margin > (.04 if learned else .065)
             result.append({**slot, 'available': available, 'accepted': bool(accepted), 'source': sources[ti], 'score': round(score,4), 'margin': round(margin,4), 'abilityId': ident, 'name': row['name'], 'winrate': row['winrate'], 'candidates': [{'abilityId': k, 'name': self.rows[k]['name'], 'winrate': self.rows[k]['winrate']} for k in order[:3]]})
         return result
 
@@ -212,33 +166,23 @@ def recommendations(results):
 
 
 def annotate(im, results):
-    """Draw compact, consistent labels anchored to each tile's lower edge."""
     out=im.convert('RGB').copy(); d=ImageDraw.Draw(out)
     scale = min(results[0]['sx'],results[0]['sy']) if results else im.width/REFERENCE[0]
-    try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(13,int(15*scale)))
-    except OSError: font=ImageFont.load_default(size=max(13,int(15*scale)))
+    try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(12,int(15*scale)))
+    except OSError: font=ImageFont.load_default(size=max(12,int(15*scale)))
     best = recommendations(results)
     for r in results:
-        x=r['x']; y=r['y']
-        # Fixed pixel anchor: every label belongs to the same tile edge.
-        label_y = y + 45*r['sy']
-        if r['accepted']:
-            text=f"{r['winrate']*100:.1f}%"
-            color = '#8bf0b0' if r['winrate']>=.5 else '#ffbd83'
-            if r['slot'] in best:
-                color = '#ffe173' if r['kind']=='ultimate' else '#64e9ff'
-                d.text((x-12*r['sx'], y-23*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=max(1,int(scale)),stroke_fill='#101722')
-            # Text only: no wide rectangle that can hide the icon. A dark outline keeps it readable.
-            bbox=d.textbbox((0,0),text,font=font,stroke_width=max(1,int(2*scale))); tw=bbox[2]-bbox[0]
-            d.text((x-tw/2,label_y-bbox[1]),text,font=font,fill=color,stroke_width=max(1,int(2*scale)),stroke_fill='#101722')
-        else:
-            # Uncertain slots remain visible as small, square question markers.
-            side=max(14,int(17*scale)); half=side/2
-            d.rounded_rectangle((x-half,label_y-half,x+half,label_y+half),radius=2*scale,fill='#121a24',outline='#d5d9df',width=max(1,int(scale)))
-            qbbox=d.textbbox((0,0),'?',font=font); qw=qbbox[2]-qbbox[0]; qh=qbbox[3]-qbbox[1]
-            d.text((x-qw/2,label_y-qh/2-qbbox[1]),'?',font=font,fill='#d5d9df',stroke_width=max(1,int(scale)),stroke_fill='#121a24')
+        text = f"{r['winrate']*100:.1f}%" if r['accepted'] else '?'
+        color = ('#8bf0b0' if r['winrate']>=.5 else '#ffbd83') if r['accepted'] else '#d5d9df'
+        x=r['x']; y=r['y']+22*r['sy']
+        if r['slot'] in best:
+            color = '#ffe173' if r['kind']=='ultimate' else '#64e9ff'
+            d.rounded_rectangle((x-32*r['sx'], r['y']-32*r['sy'], x+32*r['sx'], r['y']+43*r['sy']), radius=4*scale, outline=color, width=max(2,int(3*scale)))
+            d.text((x-29*r['sx'],r['y']-32*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=2,stroke_fill='#121a24')
+        box=d.textbbox((0,0),text,font=font);tw=box[2];th=box[3]-box[1]
+        d.rounded_rectangle((x-tw/2-5*scale,y,x+tw/2+5*scale,y+th+8*scale),radius=3*scale,fill='#121a24',outline=color)
+        d.text((x-tw/2,y+3*scale-box[1]),text,font=font,fill=color)
     return out
-
 
 
 if __name__=='__main__':

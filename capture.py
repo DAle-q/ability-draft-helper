@@ -16,9 +16,8 @@ def prepare_capture(im, settings):
     rect = settings.get('captureRect')
     ratio = settings.get('sourceAspect', 0)
     # Default layout for the user's 5120x1440 ultrawide Dota window.
-    if im.width/im.height > 3.0 and (not rect or rect[3] > 0.85):
-        # The lower part of the game window is chat. Keep the draft board only.
-        rect = [0.36, 0.05, 0.64, 0.82]
+    if not rect and im.width/im.height > 3.0:
+        rect = [0.36, 0.05, 0.64, 0.95]
         ratio = im.width / im.height
     if not rect or len(rect) != 4 or not ratio or abs(im.width/im.height-ratio) > .03:
         return im.copy(), 'calibrate'
@@ -47,17 +46,15 @@ def main():
         try: fcntl.flock(lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         except BlockingIOError: return
         try:
-            # Start the helper before Spectacle. If the compositor refuses a
-            # capture, the user still gets a visible window with the error.
-            with (STATE/'app.log').open('a') as log:
-                subprocess.Popen([str(ROOT/'start.sh'),'--inbox'], stdout=log, stderr=log,
-                                 start_new_session=True)
             with tempfile.TemporaryDirectory(prefix='ability-draft-') as temp:
                 output=Path(temp)/'window.png'
                 subprocess.run(['spectacle','--background','--activewindow','--no-decoration','--no-shadow','--nonotify','--output',str(output)],check=True,timeout=30)
                 if not output.exists():
                     raise RuntimeError('Spectacle не сохранил изображение. Повторите захват на экране драфта.')
                 with Image.open(output) as im: deliver(im.convert('RGB'))
+            # Existing app holds a lock; this invocation exits without raising it.
+            with (STATE/'app.log').open('a') as log:
+                subprocess.Popen([str(ROOT/'start.sh'),'--inbox'],stdout=log,stderr=log,start_new_session=True)
         except Exception as exc:
             atomic_json(STATE/'capture-error.json',{'id':str(time.time_ns()),'error':str(exc)})
             subprocess.run(['notify-send','Ability Draft','Не удалось захватить драфт: '+str(exc)],check=False)
