@@ -172,19 +172,17 @@ def annotate(im, results):
     except OSError: font=ImageFont.load_default(size=max(12,int(15*scale)))
     best = recommendations(results)
     for r in results:
-        # Keep uncertain slots visually clean; they remain clickable in the app for manual correction.
-        if not r['accepted']:
-            continue
-        text = f"{r['winrate']*100:.1f}%"
-        color = '#8bf0b0' if r['winrate']>=.5 else '#ffbd83'
+        text = f"{r['winrate']*100:.1f}%" if r['accepted'] else '?'
+        color = ('#8bf0b0' if r['winrate']>=.5 else '#ffbd83') if r['accepted'] else '#d5d9df'
         x=r['x']; y=r['y']+22*r['sy']
         if r['slot'] in best:
             color = '#ffe173' if r['kind']=='ultimate' else '#64e9ff'
             d.rounded_rectangle((x-27*r['sx'], r['y']-27*r['sy'], x+27*r['sx'], r['y']+38*r['sy']), radius=4*scale, outline=color, width=max(2,int(3*scale)))
             d.text((x-24*r['sx'],r['y']-27*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=2,stroke_fill='#121a24')
         box=d.textbbox((0,0),text,font=font);tw=box[2];th=box[3]-box[1]
-        d.rounded_rectangle((x-tw/2-5*scale,y,x+tw/2+5*scale,y+th+8*scale),radius=3*scale,fill='#121a24',outline=color)
-        d.text((x-tw/2,y+3*scale-box[1]),text,font=font,fill=color)
+        pad=3*scale if r['accepted'] else 2*scale
+        d.rounded_rectangle((x-tw/2-pad,y,x+tw/2+pad,y+th+4*scale),radius=2*scale,fill='#121a24',outline=color,width=max(1,int(scale)))
+        d.text((x-tw/2,y+1*scale-box[1]),text,font=font,fill=color)
     return out
 
 
