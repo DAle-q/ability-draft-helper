@@ -58,6 +58,8 @@ class App:
         except Exception as exc:
             self.failed('Could not open: '+str(exc)); return
         self.source_for_capture=from_capture and mode=='calibrate'
+        if from_capture:
+            self.maximize_for_capture()
         self.results=[]; self.regionbutton.config(state='normal')
         if mode=='auto':
             ratio=self.original.width/self.original.height
@@ -66,6 +68,13 @@ class App:
             self.im=self.original.copy(); self.begin_selection(); return
         self.im=self.original.crop(board_box(self.original.size)) if mode=='full' else self.original.copy()
         self.run_recognition()
+
+    def maximize_for_capture(self):
+        """Make a hotkey capture immediately visible at the largest useful size."""
+        try:
+            self.root.state('zoomed')
+        except tk.TclError:
+            self.root.attributes('-zoomed', True)
 
     def run_recognition(self):
         self.busy=True; self.openbutton.config(state='disabled'); self.regionbutton.config(state='disabled'); self.savebutton.config(state='disabled')
