@@ -1,6 +1,7 @@
 """Local desktop screenshot annotator. No uploads or network calls."""
 import json
 import threading
+import queue
 import tkinter as tk
 from tkinter import ttk,filedialog,messagebox
 from PIL import Image,ImageTk
@@ -9,7 +10,8 @@ from recognizer import Recognizer,annotate,ROOT
 class App:
     def __init__(self,root):
         self.root=root;root.title('Ability Draft — проценты на скриншоте');root.geometry('1280x820')
-        self.im=None;self.results=[];self.busy=False
+        self.im=None;self.results=[];self.busy=False;self.messages=queue.Queue()
+        root.after(100,self.poll)
         bar=ttk.Frame(root,padding=12);bar.pack(fill='x')
         self.openbutton=ttk.Button(bar,text='Открыть скриншот…',command=self.open);self.openbutton.pack(side='left')
         self.savebutton=ttk.Button(bar,text='Сохранить PNG…',command=self.save,state='disabled');self.savebutton.pack(side='left',padx=10)
@@ -32,10 +34,16 @@ class App:
         def work():
             try:
                 results=self.engine.recognize(self.im)
-                self.root.after(0,lambda:self.done(results))
+                self.messages.put(('done',results))
             except Exception as exc:
-                error=str(exc);self.root.after(0,lambda:self.failed(error))
+                self.messages.put(('error',str(exc)))
         threading.Thread(target=work,daemon=True).start()
+    def poll(self):
+        try:
+            kind,value=self.messages.get_nowait()
+            self.done(value) if kind=='done' else self.failed(value)
+        except queue.Empty:pass
+        self.root.after(100,self.poll)
     def failed(self,error):
         self.busy=False;self.openbutton.config(state='normal');self.status.set(error)
     def done(self,results):
