@@ -169,17 +169,17 @@ def recommendations(results):
 def annotate(im, results):
     out=im.convert('RGB').copy(); d=ImageDraw.Draw(out)
     scale = min(results[0]['sx'],results[0]['sy']) if results else im.width/REFERENCE[0]
-    try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(13,int(15*scale)))
-    except OSError: font=ImageFont.load_default(size=max(13,int(15*scale)))
+    try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(10,int(11*scale)))
+    except OSError: font=ImageFont.load_default(size=max(10,int(11*scale)))
     best = recommendations(results)
     for r in results:
         text = f"{r['winrate']*100:.1f}%" if r['accepted'] else '?'
         color = ('#8bf0b0' if r['winrate']>=.5 else '#ffbd83') if r['accepted'] else '#d5d9df'
-        x=r['x']; y=r['y']+27*r['sy']
+        x=r['x']; y=r['y']+18*r['sy']
         if r['slot'] in best:
             color = '#ffe173' if r['kind']=='ultimate' else '#64e9ff'
-            d.rounded_rectangle((x-25*r['sx'], r['y']-25*r['sy'], x+25*r['sx'], r['y']+40*r['sy']), radius=4*scale, outline=color, width=max(2,int(3*scale)))
-            d.text((x-23*r['sx'],r['y']-25*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=2,stroke_fill='#121a24')
+            d.rounded_rectangle((x-22*r['sx'], r['y']-22*r['sy'], x+22*r['sx'], r['y']+32*r['sy']), radius=4*scale, outline=color, width=max(2,int(3*scale)))
+            d.text((x-20*r['sx'],r['y']-22*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=2,stroke_fill='#121a24')
         box=d.textbbox((0,0),text,font=font);tw=box[2];th=box[3]-box[1]
         pad=2*scale if r['accepted'] else 1.5*scale
         d.rounded_rectangle((x-tw/2-pad,y,x+tw/2+pad,y+th+4*scale),radius=2*scale,fill='#121a24',outline=color,width=max(1,int(scale)))
