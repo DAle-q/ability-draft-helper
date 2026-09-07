@@ -1,192 +1,68 @@
-"""Offline matching, persistent user examples, and draft recommendations."""
+"""Offline icon matching for the full, uncropped Ability Draft screen layout."""
 from pathlib import Path
-import hashlib
 import json
-import os
 import numpy as np
 from PIL import Image, ImageDraw, ImageFont
-
-ROOT = Path(__file__).resolve().parent
-REFERENCE = (2048, 1018)
-BOARD = (640, 115, 1440, 814)
-
-
-def atomic_json(path, data):
-    path = Path(path)
-    path.parent.mkdir(parents=True, exist_ok=True)
-    temp = path.with_suffix('.tmp')
-    temp.write_text(json.dumps(data, ensure_ascii=False, indent=2))
-    os.replace(temp, path)
-
+ROOT=Path(__file__).resolve().parent
 
 def feature(im):
-    a = np.asarray(im.resize((16, 16), Image.Resampling.BILINEAR).convert('RGB'), dtype=np.float32).reshape(-1) / 255
-    return (a - a.mean()) / (a.std() + .10)
+    a=np.asarray(im.resize((16,16),Image.Resampling.BILINEAR).convert('RGB'),dtype=np.float32)/255
+    a=a.reshape(-1)
+    return (a-a.mean())/(a.std()+.10)
 
-
-def board_box(size):
-    w, h = size
-    return tuple(round(v * (w / REFERENCE[0] if i % 2 == 0 else h / REFERENCE[1])) for i, v in enumerate(BOARD))
-
-
-def crop_board(im):
-    return im.crop(board_box(im.size))
-
-
-def slots(w, h, mode='full'):
-    coords = []
-    for y in [166, 263]:
-        for x in [807, 900, 995, 1090, 1184, 1278]:
-            coords.append((x, y, 'ultimate'))
-    for y, xs in [(338, [738,834,912,993,1095,1173,1250,1344]), (403, [727,829,909,992,1096,1175,1253,1353]), (472, [717,824,905,990,1098,1178,1258,1363]), (584, [703,815,901,987,1100,1184,1267,1378]), (667, [691,809,899,986,1102,1188,1274,1391]), (754, [678,804,897,985,1105,1193,1282,1405])]:
-        for j, x in enumerate(xs):
-            coords.append((x, y, 'hero' if j in (0, 7) else 'standard'))
-    ox, oy, bw, bh = (0, 0, *REFERENCE) if mode == 'full' else (BOARD[0], BOARD[1], BOARD[2]-BOARD[0], BOARD[3]-BOARD[1])
-    return [{'slot': i, 'x': (x-ox)*w/bw, 'y': (y-oy)*h/bh, 'kind': kind, 'hero': kind == 'hero', 'sx': w/bw, 'sy': h/bh} for i, (x, y, kind) in enumerate(coords)]
-
-
-def icon_crop(im, slot, size=48):
-    x, y, sx, sy = (slot[k] for k in ('x', 'y', 'sx', 'sy'))
-    return im.crop((x-size/2*sx, y-size/2*sy, x+size/2*sx, y+size/2*sy)).convert('RGB')
-
+def slots(w,h):
+    # Reference coordinates describe UI geometry only, never ability identities.
+    coords=[]
+    for y in [166,263]:
+        for x in [807,900,995,1090,1184,1278]: coords.append((x,y,False))
+    for y,xs in [(338,[738,834,912,993,1095,1173,1250,1344]),(403,[727,829,909,992,1096,1175,1253,1353]),(472,[717,824,905,990,1098,1178,1258,1363]),(584,[703,815,901,987,1100,1184,1267,1378]),(667,[691,809,899,986,1102,1188,1274,1391]),(754,[678,804,897,985,1105,1193,1282,1405])]:
+        for j,x in enumerate(xs): coords.append((x,y,j in (0,7)))
+    return [(x*w/2048,y*h/1018,hero) for x,y,hero in coords]
 
 class Recognizer:
-    def __init__(self, learned_dir=None):
-        data = json.loads((ROOT/'data/windrun-7.41d.json').read_text())
-        self.rows = {r['abilityId']: r for r in data['abilityStats'] if 'name' in r}
-        manifest = json.loads((ROOT/'data/icon-manifest.json').read_text())
-        self.learned_dir = Path(learned_dir) if learned_dir else ROOT/'data/learned-icons'
-        self.entries = [m for m in manifest if m['status'] == 'ok']
-        self.vendor_features = {m['abilityId']: feature(Image.open(ROOT/m['path'])) for m in self.entries}
-        self.reload_examples()
-
-    def choices(self, kind):
-        return [r for r in self.rows.values() if (r['abilityId'] < 0 if kind == 'hero' else r['abilityId'] > 0 and (r.get('isUltimate') is True if kind == 'ultimate' else r.get('isUltimate') is not True))]
-
-    def reload_examples(self):
-        self.examples = {}
-        self.learning_error = None
-        index = self.learned_dir/'index.json'
-        try:
-            self.examples = json.loads(index.read_text()) if index.exists() else {}
-            if not isinstance(self.examples, dict):
-                raise ValueError('Индекс образцов должен быть словарём')
-        except (OSError, ValueError) as exc:
-            self.examples = {}
-            self.learning_error = str(exc)
-        self.groups = {}
-        for kind in ['ultimate', 'standard', 'hero']:
-            rows = self.choices(kind)
-            features, ids, sources = [], [], []
-            allowed = {r['abilityId'] for r in rows}
-            for ident in allowed:
-                if ident in self.vendor_features:
-                    features.append(self.vendor_features[ident]); ids.append(ident); sources.append('valve')
-            for digest, sample in self.examples.items():
-                if sample['abilityId'] not in allowed:
-                    continue
-                try:
-                    # Filenames are derived from a validated digest, not arbitrary index paths.
-                    if len(digest) != 64 or any(c not in '0123456789abcdef' for c in digest):
-                        raise ValueError('Invalid example hash')
-                    features.append(feature(Image.open(self.learned_dir/(digest+'.png'))))
-                    ids.append(sample['abilityId']); sources.append('learned')
-                except (OSError, ValueError) as exc:
-                    self.learning_error = str(exc)
-            self.groups[kind] = (np.stack(features), np.array(ids), sources)
-
-    def learn(self, im, slot, ability_id):
-        if self.learning_error:
-            raise ValueError('Не удалось прочитать сохранённые образцы: '+self.learning_error)
-        if ability_id not in {r['abilityId'] for r in self.choices(slot['kind'])}:
-            raise ValueError('Способность не относится к этой группе')
-        if not slot.get('available', True):
-            raise ValueError('Затемнённую позицию нельзя использовать как образец. Выберите видимую иконку.')
-        sample = icon_crop(im, slot).resize((64, 64), Image.Resampling.LANCZOS)
-        digest = hashlib.sha256(sample.tobytes()).hexdigest()
-        self.learned_dir.mkdir(parents=True, exist_ok=True)
-        sample.save(self.learned_dir/(digest+'.png'))
-        self.examples[digest] = {'abilityId': ability_id, 'name': self.rows[ability_id]['name']}
-        atomic_json(self.learned_dir/'index.json', self.examples)
-        self.reload_examples()
-        return digest
-
-    def forget(self, im, slot):
-        sample = icon_crop(im, slot).resize((64,64), Image.Resampling.LANCZOS)
-        digest = hashlib.sha256(sample.tobytes()).hexdigest()
-        if digest in self.examples:
-            del self.examples[digest]
-            atomic_json(self.learned_dir/'index.json', self.examples)
-            self.reload_examples()
-            return True
-        return False
-
-    def recognize(self, im, mode='full'):
-        im = im.convert('RGB'); w, h = im.size
-        if mode not in ('full', 'board'):
-            raise ValueError('Неизвестный формат изображения')
-        if mode == 'full' and abs(w/h - REFERENCE[0]/REFERENCE[1]) > .08:
-            raise ValueError('Выделите область драфта: кнопка «Выделить сетку». Нужны все иконки, включая портреты по краям.')
-        result = []
-        for slot in slots(w, h, mode):
-            x, y, sx, sy = (slot[k] for k in ('x','y','sx','sy'))
-            templates, ids, sources = self.groups[slot['kind']]
-            crops = []
+    def __init__(self):
+        data=json.loads((ROOT/'data/windrun-7.41d.json').read_text())
+        manifest=json.loads((ROOT/'data/icon-manifest.json').read_text())
+        rows={r['abilityId']:r for r in data['abilityStats']}
+        self.groups={}
+        for hero in [False,True]:
+            entries=[m for m in manifest if m['status']=='ok' and (m['abilityId']<0)==hero]
+            self.groups[hero]=([rows[m['abilityId']] for m in entries],np.stack([feature(Image.open(ROOT/m['path'])) for m in entries]))
+    def recognize(self,im):
+        im=im.convert('RGB'); w,h=im.size
+        if abs(w/h-2048/1018)>.08: raise ValueError('Нужен полный скриншот драфта с соотношением сторон около 2:1. Обрезанные изображения пока не поддерживаются.')
+        result=[]; scale=w/2048
+        for x,y,hero in slots(w,h):
+            rows,templates=self.groups[hero]
+            crops=[]; boxes=[]
             for size in [42,48,54,60]:
                 for dx,dy in [(0,0),(-3,0),(3,0),(0,-3),(0,3)]:
-                    shifted = {**slot, 'x': x+dx*sx, 'y': y+dy*sy}
-                    crops.append(feature(icon_crop(im, shifted, size)))
-            samples = np.stack(crops)
-            distances = ((samples[:,None,:]-templates[None,:,:])**2).mean(axis=2).min(axis=0)
-            # Multiple examples of the same ability must not compete in the margin test.
-            by_id = {}
-            for i, ident in enumerate(ids):
-                ident = int(ident)
-                if ident not in by_id or distances[i] < distances[by_id[ident]]:
-                    by_id[ident] = i
-            order = sorted(by_id, key=lambda ident: float(distances[by_id[ident]]))
-            ident = order[0]; ti = by_id[ident]
-            score = float(distances[ti]); margin = float(distances[by_id[order[1]]] - score)
-            row = self.rows[ident]
-            brightness = float(np.asarray(icon_crop(im, slot, 36)).mean()/255)
-            available = brightness > .07
-            learned = sources[ti] == 'learned'
-            accepted = available and score < (.16 if learned else (.22 if slot['hero'] else .30)) and margin > (.04 if learned else .065)
-            result.append({**slot, 'available': available, 'accepted': bool(accepted), 'source': sources[ti], 'score': round(score,4), 'margin': round(margin,4), 'abilityId': ident, 'name': row['name'], 'winrate': row['winrate'], 'candidates': [{'abilityId': k, 'name': self.rows[k]['name'], 'winrate': self.rows[k]['winrate']} for k in order[:3]]})
+                    box=(x+(dx-size/2)*scale,y+(dy-size/2)*scale,x+(dx+size/2)*scale,y+(dy+size/2)*scale)
+                    crops.append(feature(im.crop(box)));boxes.append(box)
+            samples=np.stack(crops)
+            distances=((samples[:,None,:]-templates[None,:,:])**2).mean(axis=2)
+            best=distances.min(axis=0); order=np.argsort(best); idx=int(order[0]); score=float(best[idx]);margin=float(best[order[1]]-score)
+            row=rows[idx]
+            brightness=np.asarray(im.crop((x-18*scale,y-18*scale,x+18*scale,y+18*scale))).mean()/255
+            accepted=score<(.22 if hero else .30) and margin>.065 and brightness>.07
+            result.append({'x':x,'y':y,'hero':hero,'accepted':bool(accepted),'score':round(score,4),'margin':round(margin,4),'abilityId':row['abilityId'],'name':row['name'],'winrate':row['winrate'],'candidates':[{'name':rows[int(k)]['name'],'winrate':rows[int(k)]['winrate'],'score':round(float(best[k]),4)} for k in order[:3]]})
         return result
 
-
-def recommendations(results):
-    selected = {}
-    for kind, count in [('ultimate',1), ('standard',3)]:
-        eligible = [r for r in results if r['kind'] == kind and r['accepted'] and r.get('available', True)]
-        for rank, r in enumerate(sorted(eligible, key=lambda r: (-r['winrate'],r['slot']))[:count],1):
-            selected[r['slot']] = rank
-    return selected
-
-
-def annotate(im, results):
-    out=im.convert('RGB').copy(); d=ImageDraw.Draw(out)
-    scale = min(results[0]['sx'],results[0]['sy']) if results else im.width/REFERENCE[0]
+def annotate(im,results):
+    out=im.convert('RGB').copy();d=ImageDraw.Draw(out);scale=im.width/2048
     try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(12,int(15*scale)))
     except OSError: font=ImageFont.load_default(size=max(12,int(15*scale)))
-    best = recommendations(results)
     for r in results:
-        text = f"{r['winrate']*100:.1f}%" if r['accepted'] else '?'
-        color = ('#8bf0b0' if r['winrate']>=.5 else '#ffbd83') if r['accepted'] else '#d5d9df'
-        x=r['x']; y=r['y']+22*r['sy']
-        if r['slot'] in best:
-            color = '#ffe173' if r['kind']=='ultimate' else '#64e9ff'
-            d.rounded_rectangle((x-32*r['sx'], r['y']-32*r['sy'], x+32*r['sx'], r['y']+43*r['sy']), radius=4*scale, outline=color, width=max(2,int(3*scale)))
-            d.text((x-29*r['sx'],r['y']-32*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=2,stroke_fill='#121a24')
+        text=f"{r['winrate']*100:.1f}%" if r['accepted'] else '?'
+        color=('#8bf0b0' if r['winrate']>=.5 else '#ffbd83') if r['accepted'] else '#d5d9df'
+        x=r['x'];y=r['y']+22*scale
         box=d.textbbox((0,0),text,font=font);tw=box[2];th=box[3]-box[1]
         d.rounded_rectangle((x-tw/2-5*scale,y,x+tw/2+5*scale,y+th+8*scale),radius=3*scale,fill='#121a24',outline=color)
         d.text((x-tw/2,y+3*scale-box[1]),text,font=font,fill=color)
     return out
 
-
 if __name__=='__main__':
     import argparse
-    p=argparse.ArgumentParser();p.add_argument('input');p.add_argument('--mode',choices=['full','board'],default='full');p.add_argument('--output',default='outputs/annotated.png');a=p.parse_args()
-    im=Image.open(a.input);results=Recognizer().recognize(im,a.mode);out=Path(a.output);out.parent.mkdir(parents=True,exist_ok=True);annotate(im,results).save(out);atomic_json(out.with_suffix('.json'),results)
+    p=argparse.ArgumentParser();p.add_argument('input');p.add_argument('--output',default='outputs/annotated.png');a=p.parse_args()
+    im=Image.open(a.input);results=Recognizer().recognize(im);out=Path(a.output);out.parent.mkdir(parents=True,exist_ok=True);annotate(im,results).save(out);out.with_suffix('.json').write_text(json.dumps(results,ensure_ascii=False,indent=2))
     print(f'{sum(r["accepted"] for r in results)}/{len(results)} confident matches; output: {out}')
