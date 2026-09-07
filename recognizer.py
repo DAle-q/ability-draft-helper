@@ -34,6 +34,24 @@ def crop_board(im):
 
 
 def slots(w, h, mode='full'):
+    if mode == 'board':
+        # Perspective-calibrated centers measured on the cropped draft board.
+        # The crop is scaled from 1494x1158, so this also works at other sizes.
+        ultimate_x = [365, 493, 623, 752, 881, 1010]
+        grid_x = [241, 365, 495, 623, 824, 953, 1081, 1211]
+        rows = [(ultimate_x, [144, 299], 'ultimate'),
+                (grid_x, [422, 544, 667], 'standard'),
+                (grid_x, [803, 923, 1040], 'standard')]
+        result=[]; i=0
+        for xs, ys, kind in rows:
+            for y in ys:
+                for j, x in enumerate(xs):
+                    actual_kind = 'hero' if kind == 'standard' and j in (0, 7) else kind
+                    result.append({'slot': i, 'x': x*w/1494, 'y': y*h/1158,
+                                   'kind': actual_kind, 'hero': actual_kind == 'hero',
+                                   'sx': w/1494, 'sy': h/1158})
+                    i += 1
+        return result
     coords = []
     for y in [166, 263]:
         for x in [807, 900, 995, 1090, 1184, 1278]:
@@ -41,8 +59,7 @@ def slots(w, h, mode='full'):
     for y, xs in [(338, [738,834,912,993,1095,1173,1250,1344]), (403, [727,829,909,992,1096,1175,1253,1353]), (472, [717,824,905,990,1098,1178,1258,1363]), (584, [703,815,901,987,1100,1184,1267,1378]), (667, [691,809,899,986,1102,1188,1274,1391]), (754, [678,804,897,985,1105,1193,1282,1405])]:
         for j, x in enumerate(xs):
             coords.append((x, y, 'hero' if j in (0, 7) else 'standard'))
-    # Board screenshots are cropped with side margins; use a compact horizontal calibration.
-    ox, oy, bw, bh = (0, 0, *REFERENCE) if mode == 'full' else (520, BOARD[1], 1050, BOARD[3]-BOARD[1])
+    ox, oy, bw, bh = (0, 0, *REFERENCE)
     return [{'slot': i, 'x': (x-ox)*w/bw, 'y': (y-oy)*h/bh, 'kind': kind, 'hero': kind == 'hero', 'sx': w/bw, 'sy': h/bh} for i, (x, y, kind) in enumerate(coords)]
 
 
