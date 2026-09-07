@@ -132,8 +132,8 @@ class Recognizer:
             x, y, sx, sy = (slot[k] for k in ('x','y','sx','sy'))
             templates, ids, sources = self.groups[slot['kind']]
             crops = []
-            for size in [42,48,54,60]:
-                for dx,dy in [(0,0),(-3,0),(3,0),(0,-3),(0,3)]:
+            for size in [34,40,46,52,58,64,72]:
+                for dx,dy in [(0,0),(-4,0),(4,0),(0,-4),(0,4),(-8,0),(8,0),(0,-8),(0,8),(-12,0),(12,0),(0,-12),(0,12)]:
                     shifted = {**slot, 'x': x+dx*sx, 'y': y+dy*sy}
                     crops.append(feature(icon_crop(im, shifted, size)))
             samples = np.stack(crops)
@@ -151,7 +151,7 @@ class Recognizer:
             brightness = float(np.asarray(icon_crop(im, slot, 36)).mean()/255)
             available = brightness > .07
             learned = sources[ti] == 'learned'
-            accepted = available and score < (.16 if learned else (.22 if slot['hero'] else .30)) and margin > (.04 if learned else .065)
+            accepted = available and score < (.28 if learned else (.55 if slot['hero'] else .50)) and margin > (.018 if learned else .012)
             result.append({**slot, 'available': available, 'accepted': bool(accepted), 'source': sources[ti], 'score': round(score,4), 'margin': round(margin,4), 'abilityId': ident, 'name': row['name'], 'winrate': row['winrate'], 'candidates': [{'abilityId': k, 'name': self.rows[k]['name'], 'winrate': self.rows[k]['winrate']} for k in order[:3]]})
         return result
 
