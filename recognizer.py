@@ -167,24 +167,34 @@ def recommendations(results):
 
 
 def annotate(im, results):
+    """Draw compact, consistent labels anchored to each tile's lower edge."""
     out=im.convert('RGB').copy(); d=ImageDraw.Draw(out)
     scale = min(results[0]['sx'],results[0]['sy']) if results else im.width/REFERENCE[0]
-    try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(10,int(11*scale)))
-    except OSError: font=ImageFont.load_default(size=max(10,int(11*scale)))
+    try: font=ImageFont.truetype('/usr/share/fonts/TTF/DejaVuSans-Bold.ttf',max(13,int(15*scale)))
+    except OSError: font=ImageFont.load_default(size=max(13,int(15*scale)))
     best = recommendations(results)
     for r in results:
-        text = f"{r['winrate']*100:.1f}%" if r['accepted'] else '?'
-        color = ('#8bf0b0' if r['winrate']>=.5 else '#ffbd83') if r['accepted'] else '#d5d9df'
-        x=r['x']; y=r['y']+18*r['sy']
-        if r['slot'] in best:
-            color = '#ffe173' if r['kind']=='ultimate' else '#64e9ff'
-            d.rounded_rectangle((x-22*r['sx'], r['y']-22*r['sy'], x+22*r['sx'], r['y']+32*r['sy']), radius=4*scale, outline=color, width=max(2,int(3*scale)))
-            d.text((x-20*r['sx'],r['y']-22*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=2,stroke_fill='#121a24')
-        box=d.textbbox((0,0),text,font=font);tw=box[2];th=box[3]-box[1]
-        pad=2*scale if r['accepted'] else 1.5*scale
-        d.rounded_rectangle((x-tw/2-pad,y,x+tw/2+pad,y+th+4*scale),radius=2*scale,fill='#121a24',outline=color,width=max(1,int(scale)))
-        d.text((x-tw/2,y+1*scale-box[1]),text,font=font,fill=color)
+        x=r['x']; y=r['y']
+        # Place every label below its icon center using the same anchor.
+        label_y = y + 25*r['sy']
+        if r['accepted']:
+            text=f"{r['winrate']*100:.1f}%"
+            color = '#8bf0b0' if r['winrate']>=.5 else '#ffbd83'
+            if r['slot'] in best:
+                color = '#ffe173' if r['kind']=='ultimate' else '#64e9ff'
+                d.rounded_rectangle((x-27*r['sx'], y-27*r['sy'], x+27*r['sx'], y+36*r['sy']), radius=3*scale, outline=color, width=max(2,int(2*scale)))
+                d.text((x-23*r['sx'],y-25*r['sy']),str(best[r['slot']]),font=font,fill=color,stroke_width=max(1,int(scale)),stroke_fill='#101722')
+            # Text only: no wide rectangle that can hide the icon. A dark outline keeps it readable.
+            bbox=d.textbbox((0,0),text,font=font,stroke_width=max(1,int(2*scale))); tw=bbox[2]-bbox[0]
+            d.text((x-tw/2,label_y-bbox[1]),text,font=font,fill=color,stroke_width=max(1,int(2*scale)),stroke_fill='#101722')
+        else:
+            # Uncertain slots remain visible as small, square question markers.
+            side=max(14,int(17*scale)); half=side/2
+            d.rounded_rectangle((x-half,label_y-half,x+half,label_y+half),radius=2*scale,fill='#121a24',outline='#d5d9df',width=max(1,int(scale)))
+            qbbox=d.textbbox((0,0),'?',font=font); qw=qbbox[2]-qbbox[0]; qh=qbbox[3]-qbbox[1]
+            d.text((x-qw/2,label_y-qh/2-qbbox[1]),'?',font=font,fill='#d5d9df',stroke_width=max(1,int(scale)),stroke_fill='#121a24')
     return out
+
 
 
 if __name__=='__main__':
