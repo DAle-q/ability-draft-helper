@@ -9,6 +9,7 @@ from PyQt6.QtWidgets import QApplication,QWidget,QSystemTrayIcon,QMenu
 from PyQt6.QtDBus import QDBusConnection,QDBusAbstractAdaptor,QDBusInterface
 ROOT=Path(__file__).resolve().parents[1]
 SERVICE='io.github.dale.AbilityDraftOverlay'
+from geometry import window_rect
 
 @pyqtClassInfo('D-Bus Interface',SERVICE)
 class Adapter(QDBusAbstractAdaptor):
@@ -45,6 +46,8 @@ class Overlay(QWidget):
         self.timer=QTimer(self);self.timer.timeout.connect(self.capture);self.timer.start(7000)
         self.timeout=QTimer(self);self.timeout.setSingleShot(True);self.timeout.timeout.connect(self.expired)
         self.adaptor=Adapter(self)
+        self.lifetime=QTimer(self);self.lifetime.setSingleShot(True)
+        self.lifetime.timeout.connect(QApplication.quit);self.lifetime.start(385000)
     def status(self,text):
         self.tray.setToolTip('Ability Draft Overlay: '+text)
         (ROOT/'state/overlay-status.txt').write_text(text)
@@ -64,7 +67,9 @@ class Overlay(QWidget):
         try:fcntl.flock(self.capture_lock,fcntl.LOCK_EX|fcntl.LOCK_NB)
         except BlockingIOError:
             self.capture_lock.close();self.capture_lock=None;return
-        self.busy=True;self.snapshot=dict(self.current);self.hide();self.data=None
+        self.busy=True;self.snapshot=dict(self.current)
+        # Active-window capture reads Dota, not this separate overlay surface.
+        # Keep the last completed frame until a replacement is ready.
         QTimer.singleShot(120,self.take_capture)
     def take_capture(self):
         if self.snapshot!=self.current or self.paused:self.busy=False;self.release_capture();return
@@ -78,13 +83,14 @@ class Overlay(QWidget):
         env=QProcessEnvironment.systemEnvironment();env.remove('QT_QPA_PLATFORM');return env
     def process_error(self,*args):
         if self.proc.state()==QProcess.ProcessState.NotRunning:
-            self.timeout.stop();self.release_capture();self.busy=False;self.hide();self.status('Could not start capture/recognition')
+            self.timeout.stop();self.release_capture();self.busy=False;self.status('Could not start capture/recognition')
     def expired(self):
-        self.proc.kill();self.hide();self.status('Capture timed out')
+        self.proc.kill();self.status('Capture timed out')
     def finished(self,code,*args):
         self.timeout.stop();self.release_capture()
         if code or self.snapshot!=self.current or self.paused:
-            self.busy=False;self.hide()
+            self.busy=False
+            if self.snapshot!=self.current or self.paused:self.hide()
             if code:self.status(self.proc.readAllStandardError().data().decode(errors='replace')[-240:] or 'Capture failed')
             return
         if self.stage=='capture':
@@ -94,14 +100,21 @@ class Overlay(QWidget):
         try:
             data=json.loads(bytes(self.proc.readAllStandardOutput()))
             self.status(data['status'])
-            if not data['labels']:return
+            if not data['labels']:
+                self.data=None;self.hide();return
             g=self.current
             if abs(data['width']/data['height']-g['width']/g['height'])>.02:
                 self.status('Capture geometry mismatch');return
+            screen=next((s for s in QApplication.screens() if s.name()==g['output']['name']),None)
+            if screen is None:
+                self.hide();self.status('Game monitor unavailable');return
+            self.winId()
+            self.windowHandle().setScreen(screen)
+            origin=screen.geometry().topLeft()
+            self.setGeometry(*window_rect(g,(origin.x(),origin.y())))
             self.data=data
-            self.setGeometry(round(g['x']),round(g['y']),round(g['width']),round(g['height']))
             self.show();self.raise_();self.update()
-        except Exception as exc:self.hide();self.status(str(exc))
+        except Exception as exc:self.status(str(exc))
     def paintEvent(self,event):
         if not self.data:return
         p=QPainter(self);p.setRenderHint(QPainter.RenderHint.Antialiasing)
@@ -120,7 +133,9 @@ if __name__=='__main__':
     bus=QDBusConnection.sessionBus()
     if '--stop' in sys.argv:
         QDBusInterface(SERVICE,'/Overlay',SERVICE,bus).call('stop');sys.exit()
-    if not bus.registerService(SERVICE):sys.exit()
+    if not bus.registerService(SERVICE):
+        if '--toggle' in sys.argv:QDBusInterface(SERVICE,'/Overlay',SERVICE,bus).call('stop')
+        sys.exit()
     python=sys.argv[1];(ROOT/'state').mkdir(exist_ok=True)
     view=Overlay(python);bus.registerObject('/Overlay',view,QDBusConnection.RegisterOption.ExportAdaptors)
     name='ability-draft-overlay-observer'
