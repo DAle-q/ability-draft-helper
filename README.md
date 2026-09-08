@@ -41,7 +41,7 @@ Requires KDE Spectacle, `gdbus`, and `desktop-file-validate`:
 python3 scripts/install_shortcut.py
 ```
 
-Press **Meta+F8 while Dota is active**. Spectacle captures the active window and opens a new helper window. Both the central board and player builds are analyzed. A full local capture remains in ignored `state/full-capture.png`. No screenshots are uploaded during normal use.
+Press **Meta+F8 while Dota is active**. Spectacle captures the active window and updates the existing helper window, or opens one if it is not running. Both the central board and player builds are analyzed. A pending capture waits while recognition or manual icon selection is active; the latest capture wins. Close any windows from older versions once after upgrading. A full local capture remains in ignored `state/full-capture.png`. No screenshots are uploaded during normal use.
 
 ## Screen compatibility
 

@@ -5,10 +5,12 @@ import queue
 import tkinter as tk
 from tkinter import ttk,filedialog,messagebox
 from PIL import Image,ImageTk
+from instance import Instance
 from recognizer import Recognizer,annotate,ROOT,prepare_image
 
 class App:
-    def __init__(self,root):
+    def __init__(self,root,inbox=None):
+        self.inbox=inbox;self.seen_request=None;self.editing=False
         self.root=root;root.title('Ability Draft — draft helper');root.geometry('1280x820')
         # Maximize after the window is mapped so KDE applies its work area.
         root.after(0, self.maximize)
@@ -51,6 +53,14 @@ class App:
             kind,value=self.messages.get_nowait()
             self.done(value) if kind=='done' else self.failed(value)
         except queue.Empty:pass
+        if self.inbox and not self.busy and not self.editing:
+            try:
+                request=self.inbox.read()
+                if request and request['id']!=self.seen_request:
+                    self.seen_request=request['id']
+                    self.load(request['path'])
+            except (OSError,ValueError,KeyError) as exc:
+                self.status.set('Screenshot delivery failed: '+str(exc))
         self.root.after(100,self.poll)
     def failed(self,error):
         self.busy=False;self.openbutton.config(state='normal');self.status.set(error)
@@ -74,7 +84,12 @@ class App:
         x=(event.x-self.offset[0])/self.scale;y=(event.y-self.offset[1])/self.scale
         r=min(self.results,key=lambda r:(r['x']-x)**2+(r['y']-y)**2)
         if abs(r['x']-x)>45*self.im.width/2048 or abs(r['y']-y)>48*self.im.width/2048:return
-        popup=tk.Toplevel(self.root);popup.title('Check ability');popup.geometry('460x440');popup.transient(self.root)
+        self.editing=True
+        popup=tk.Toplevel(self.root);
+        def closed(event):
+            if event.widget is popup:self.editing=False
+        popup.bind('<Destroy>',closed)
+        popup.title('Check ability');popup.geometry('460x440');popup.transient(self.root)
         ttk.Label(popup,text='Guess: '+r['name'],padding=8).pack()
         var=tk.StringVar();entry=ttk.Entry(popup,textvariable=var);entry.pack(fill='x',padx=12);entry.focus()
         listing=tk.Listbox(popup);listing.pack(fill='both',expand=True,padx=12,pady=8)
@@ -95,6 +110,8 @@ class App:
 
 if __name__=='__main__':
     import sys
-    root=tk.Tk();app=App(root)
-    if len(sys.argv)>1:root.after(100,lambda:app.load(sys.argv[1]))
+    instance=Instance(ROOT/'state')
+    if len(sys.argv)>1:instance.send(sys.argv[1])
+    if not instance.acquire():sys.exit(0)
+    root=tk.Tk();app=App(root,instance)
     root.mainloop()
