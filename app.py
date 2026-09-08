@@ -1,5 +1,7 @@
 """Local desktop screenshot annotator. No uploads or network calls."""
 import json
+import subprocess
+import sys
 import threading
 import queue
 import tkinter as tk
@@ -19,6 +21,8 @@ class App:
         bar=ttk.Frame(root,padding=12);bar.pack(fill='x')
         self.openbutton=ttk.Button(bar,text='Open screenshot',command=self.open);self.openbutton.pack(side='left')
         self.savebutton=ttk.Button(bar,text='Save PNG',command=self.save,state='disabled');self.savebutton.pack(side='left',padx=10)
+        ttk.Button(bar,text='Start overlay',command=self.start_overlay).pack(side='left',padx=6)
+        ttk.Button(bar,text='Stop overlay',command=self.stop_overlay).pack(side='left')
         ttk.Label(bar,text='Windrun · 7.41d · overall win rate').pack(side='right')
         self.status=tk.StringVar(value='Open a draft screenshot. Click an icon to correct its name.')
         ttk.Label(root,textvariable=self.status,padding=8).pack(fill='x')
@@ -26,6 +30,21 @@ class App:
         self.canvas.bind('<Configure>',lambda e:self.render());self.canvas.bind('<Button-1>',self.edit)
         ttk.Label(root,text='Offline processing. ? means an uncertain match.',padding=8).pack(fill='x')
         self.engine=Recognizer()
+    def start_overlay(self):
+        try:
+            probe=subprocess.run(['/usr/bin/python3','-c','from PyQt6 import QtWidgets, QtDBus'],capture_output=True,timeout=5)
+            if probe.returncode:raise RuntimeError('Overlay requires PyQt6 with QtDBus in /usr/bin/python3.')
+            with (ROOT/'state/overlay.log').open('a') as log:
+                subprocess.Popen(['/usr/bin/python3',str(ROOT/'overlay/viewer.py'),sys.executable],stdout=log,stderr=log,start_new_session=True)
+            self.status.set('Overlay started. Return to Dota. Updates every 7 seconds; pause/stop from the tray. Screenshot editing stays here.')
+        except Exception as exc:messagebox.showerror('Overlay unavailable',str(exc))
+
+    def stop_overlay(self):
+        try:
+            subprocess.run(['qdbus6','io.github.dale.AbilityDraftOverlay','/Overlay','io.github.dale.AbilityDraftOverlay.stop'],capture_output=True,timeout=3)
+            self.status.set('Overlay stopped. Screenshot mode remains available.')
+        except Exception as exc:messagebox.showerror('Could not stop overlay',str(exc))
+
     def maximize(self):
         try:
             self.root.state('zoomed')

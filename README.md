@@ -51,7 +51,7 @@ Press **Meta+F8 while Dota is active**. Spectacle captures the active window and
 - **1920×1080, 2560×1440 (16:9), 3440×1440 (21:9): not currently supported/validated** by the input geometry checks. They require separate layout calibration, not merely resizing the screenshot.
 - A specific cropped review layout is also supported; arbitrary crops, HUD scales and UI changes are not.
 
-The tool is experimental. Check uncertain or surprising matches by clicking the icon. No live overlay or periodic capture is implemented.
+The tool is experimental. Check uncertain or surprising matches by clicking the icon. An optional experimental overlay is described below.
 
 ## Data and backups
 
@@ -69,3 +69,16 @@ python3 -m unittest discover -s tests -p test_builds.py -v
 ```
 
 Older `test_core.py` and `gui_smoke.py` describe the pre-rollback API and need migration before the complete historical test suite can be used.
+
+## Experimental overlay (KDE / XWayland, 5120×1440)
+
+Open the screenshot helper and press **Start overlay**, then return to Dota. The separate overlay process updates every 7 seconds while the Dota window is active. **Stop overlay** in the helper or the tray menu stops it; the tray also offers Pause.
+
+- Only confirmed percentages are drawn. No `?`, frames, averages or editing controls are drawn over the game. Correct names in screenshot mode.
+- The transparent window does not accept input or keyboard focus. It hides when Dota loses focus and before capture. A shared capture lock prevents clashes with Meta+F8.
+- Coordinates are obtained by reversing the existing ultrawide screenshot crop, then mapping physical capture pixels to the Dota client rectangle reported by KWin. The screenshot grid and recognizer are unchanged.
+- A draft-bracket image check suppresses labels on other game screens. This is heuristic, not game-state integration.
+- Requires system Python with PyQt6 and QtDBus, KDE KWin scripting, XWayland, and Spectacle. Recognition runs in the same Python runtime as the screenshot helper. No packages or persistent KWin settings are installed. The temporary read-only observer is unloaded when the overlay exits.
+- Current calibration is **32:9 / 5120×1440**. Fullscreen stacking, mixed monitor scaling and physical click-through still need confirmation in the user's live game; this is an experimental mode, not a replacement for screenshots.
+
+Implementation references: [Qt input-transparent window flags](https://doc.qt.io/qt-6/qt.html#WindowType-enum), [KWin scripting API](https://develop.kde.org/docs/plasma/kwin/api/).
