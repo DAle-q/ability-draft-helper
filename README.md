@@ -1,66 +1,71 @@
-# Ability Draft Helper
+# Dota 2 Ability Draft Helper
 
-Локальный помощник для двух мониторов: снимок драфта → сетка с винрейтами → подсветка лучшей ульты и трёх лучших обычных скиллов. Исправления иконок запоминаются. Снимки не отправляются в сеть.
+Offline screenshot recognition for Dota 2 Ability Draft: ability and hero win rates from cached Windrun statistics, player build averages, and saved manual icon corrections. English desktop UI. Developed and tested on Linux KDE with a 5120×1440 game window.
 
-## Запуск и работа
+## Screenshots
 
-Запустите **Ability Draft Helper** из меню KDE или `./start.sh`. Перенесите окно на второй монитор.
+### Draft board
 
-1. **Открыть скриншот…** — загрузить файл. Для знакомого полного формата сетка вырезается автоматически.
-2. Нажать на иконку, найти название и нажать **Выбрать и запомнить**. Сохраняется образец 64×64; последующие драфты распознают картинку независимо от позиции.
-3. Золотая рамка — лучшая из распознанных доступных ульт (12 верхних позиций). Голубые рамки с номерами 1–3 — лучшие из 36 обычных скиллов. Портреты героев исключены из рейтинга. Затемнённые позиции исключены.
-4. **Сохранить PNG…** сохраняет сетку с подписями и подсветкой.
+Win rates use a continuous scale: light red at 45% or below, orange at 48%, yellow at 50%, bright green at 55% or above. Unknown matches show `?`. This example includes manual corrections.
 
-Текущий винрейт взят из снимка Windrun **7.41d**. Это общий винрейт, не вероятность победы конкретной сборки. Неизвестные иконки `?` не участвуют в рейтинге, поэтому сначала их стоит исправить.
+![Dota 2 Ability Draft board with color-coded win rates](docs/images/draft-board.png)
 
-## Горячая клавиша (KDE)
+### Player builds
 
-**Meta+F8** (обычно Windows+F8) в активном окне Dota:
+Four skill slots per player are recognized on both sides. `AVG` is the arithmetic mean of confirmed skill win rates, with coverage such as `4/4` or `3/4`. It is **not** a build's probability of winning and does not model synergy. Incomplete averages are not directly comparable to complete builds.
 
-- При первом захвате помощник предложит выделить область доски: по ширине от левого края самых нижних портретов до правого края; сверху от начала рамок ульт, снизу до конца рамок скиллов. Включите все 12 портретов по бокам. Геометрия рассчитана на эту доску целиком, а не только на 36 центральных скиллов.
-- Область запоминается. Следующее нажатие автоматически вырезает её и обновляет открытого помощника, без поднятия его окна поверх игры.
-- Для новой калибровки нажмите **Сбросить область захвата**, вернитесь в Dota и снова нажмите Meta+F8.
-- При заметном изменении соотношения сторон окна потребуется повторное выделение.
+![Ability Draft player skill recognition and build averages](docs/images/player-builds.png)
 
-Используется уже установленный KDE Spectacle. Он захватывает активное окно; затем программа вырезает сетку. Временный полный снимок удаляется. Это не захват произвольного прямоугольника прямо из видеопамяти.
+## Run
 
-Регистрация сочетания на другом компьютере: `python3 scripts/install_shortcut.py`. Скрипт создаёт только собственные desktop-файлы в пользовательских каталогах, проверяет конфликт Meta+F8 и регистрирует сочетание через KDE. Пакеты и системные настройки не меняются. В текущем окружении регистрация подтверждена, но нажатие внутри игры требует пользовательской проверки.
-
-`./start.sh --capture` запускает тот же захват вручную. Игра должна быть активным окном в момент снимка; команда из терминала захватит терминал. При обычном использовании нажимайте горячую клавишу именно в Dota.
-
-## Запоминание и Git
-
-`data/learned-icons/` хранит маленькие PNG и `index.json` с соответствиями ID. Можно один раз исправить иконки, затем закоммитить каталог и перенести его на другой компьютер. Повторный выбор того же образца исправляет его название. **Забыть этот образец** удаляет его привязку из индекса. Автоматической отправки в GitHub нет; исправления сохраняются локально сразу.
-
-Полные скриншоты, координаты захвата, входящие файлы и журналы в `state/` и `outputs/` исключены из Git. Данные интерфейса не попадают в образцы — берётся исходная иконка до рисования процентов.
-
-## Ограничения
-
-Первая версия привязана к геометрии показанного экрана драфта. Выделение области допускает другое разрешение, но не произвольно переставленные элементы интерфейса. Неверно выделенная доска может давать неверные совпадения; проверяйте название по клику. Портреты героев и новые иконки часто требуют обучения. Для отличающейся подсветки или перспективы может понадобиться несколько образцов одного скилла.
-
-Нет живого оверлея, вставки из буфера и автоматического импорта статистики. Захват работает только по запросу. Если игра блокирует системные горячие клавиши, понадобится изменить это в её настройках или использовать ручное открытие снимка.
-
-## Зависимости и проверка
-
-Python 3.10+, Tkinter, NumPy и Pillow. На текущей машине `start.sh` использует существующий runtime Codex; иначе системный Python с пакетами из `requirements.txt`. Скрипт ничего не устанавливает.
+Requires Python, Tkinter, NumPy and Pillow (see `requirements.txt`). Install dependencies in your preferred Python environment, then run:
 
 ```sh
-python3 -m unittest discover -s tests -v
-python3 tests/gui_smoke.py /path/to/private-test-screenshot.png
-python3 recognizer.py screenshot.png --output outputs/annotated.png
-python3 recognizer.py board.png --mode board --output outputs/board.png
+./start.sh
 ```
 
-Графическая проверка требует рабочего дисплея и исходного тестового скриншота; он не включён в репозиторий. Проверяются обучение, перенос иконки между слотами, перезапуск, исправление ошибочной метки, ранжирование, калибровка и доставка снимков в окно. Физическое нажатие клавиши и захват конкретной игры этими тестами не проверяются.
+The launcher uses an existing bundled Python runtime when available, otherwise `python3`. It does not install dependencies. The window opens maximized.
 
-## Данные и источники
+- **Open screenshot**: open a full game screenshot.
+- Click an icon, select its name, then **Choose and save**. The correction is saved immediately in `data/learned-icons/corrections.json`; closing the app needs no extra save step.
+- **Save PNG**: export the annotated image.
+- **Keep ?**: mark the current result uncertain; this does not delete a previously saved correction.
 
-`data/windrun-7.41d.json`: 640 записей Windrun, 639 сопоставлены со справочником. Отрицательные ID — герои; у ID 8000 нет названия. В `assets/` — 639 PNG; соответствия и URL в `data/icon-manifest.json`. Четыре AD-варианта Kez (1517–1520) используют иконки обычных версий, соответствие требует визуальной проверки.
+Saved corrections contain small icon pixel samples, not full screenshots. Their reuse depends on visual similarity and recognition confidence.
 
-Загрузчик недостающих иконок: `python3 scripts/download_icons.py` (Python 3.9+, без сторонних пакетов). Импорт свежей статистики пока ручной.
+## KDE shortcut
 
-- Статистика и справочник: https://windrun.io/abilities
-- Изображения Valve: https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/
-- KDE Spectacle: https://docs.kde.org/stable_kf6/en/spectacle/spectacle/starting.html
+Requires KDE Spectacle, `gdbus`, and `desktop-file-validate`:
 
-Иконки Dota 2 принадлежат Valve. Репозиторий не заявляет авторство сторонних материалов.
+```sh
+python3 scripts/install_shortcut.py
+```
+
+Press **Meta+F8 while Dota is active**. Spectacle captures the active window and opens a new helper window. Both the central board and player builds are analyzed. A full local capture remains in ignored `state/full-capture.png`. No screenshots are uploaded during normal use.
+
+## Screen compatibility
+
+- **5120×1440:** tested with the demonstrated Dota draft UI.
+- Full reference screenshots around **2:1**: supported by the original layout.
+- Other resolutions with the **same UI proportions**: coordinates scale, but recognition can vary with image size and sharpness.
+- **1920×1080, 2560×1440 (16:9), 3440×1440 (21:9): not currently supported/validated** by the input geometry checks. They require separate layout calibration, not merely resizing the screenshot.
+- A specific cropped review layout is also supported; arbitrary crops, HUD scales and UI changes are not.
+
+The tool is experimental. Check uncertain or surprising matches by clicking the icon. No live overlay or periodic capture is implemented.
+
+## Data and backups
+
+Statistics are a cached Windrun **7.41d** snapshot; updates are manual. Normal recognition works offline. Ability icons come from Valve's Dota image CDN. Dota 2 and its artwork belong to Valve; this is an unofficial community project.
+
+- [Windrun statistics](https://windrun.io/abilities)
+- [Valve image CDN](https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/)
+
+The Git tag `stable-working-2026-09-08-2c39ee0` preserves the first user-confirmed working ultrawide version before subsequent additions.
+
+Focused build-average checks:
+
+```sh
+python3 -m unittest discover -s tests -p test_builds.py -v
+```
+
+Older `test_core.py` and `gui_smoke.py` describe the pre-rollback API and need migration before the complete historical test suite can be used.

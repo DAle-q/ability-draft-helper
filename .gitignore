@@ -9,3 +9,5 @@ outputs/
 .DS_Store
 
 state/
+
+data/learned-icons/*.lock
