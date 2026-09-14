@@ -19,6 +19,10 @@ class Adapter(QDBusAbstractAdaptor):
     def status(self):
         return json.dumps({'active':self.parent().current, 'busy':self.parent().busy, 'visible':self.parent().isVisible()})
     @pyqtSlot()
+    def beginDraft(self):
+        view=self.parent();view.lifetime.start(385000)
+        view.paused=False;view.capture()
+    @pyqtSlot()
     def stop(self):QApplication.quit()
 
 class Overlay(QWidget):

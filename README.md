@@ -82,3 +82,28 @@ Press **Meta+F9** to start a 385-second (6m25s) overlay session; press it again 
 - Current calibration is **32:9 / 5120×1440**. Fullscreen stacking, mixed monitor scaling and physical click-through still need confirmation in the user's live game; this is an experimental mode, not a replacement for screenshots.
 
 Implementation references: [Qt input-transparent window flags](https://doc.qt.io/qt-6/qt.html#WindowType-enum), [KWin scripting API](https://develop.kde.org/docs/plasma/kwin/api/).
+
+## Auto accept → draft overlay (Win / Meta + F10)
+
+Press **Win+F10** once after starting matchmaking; press it again to cancel.
+Keep Dota active. Every 5 seconds, a separate process captures the active Dota
+window and looks for the English **ACCEPT** button, its green background and the
+**ABILITY DRAFT / READY** heading. It sends **Enter**, without moving the mouse.
+It continues waiting if other players fail to accept and matchmaking resumes.
+
+After two consecutive draft-board detections, auto accept stops and starts (or
+rearms) the existing 385-second overlay session. **Win+F9** still controls the
+overlay and **Win+F8** still captures screenshots. The tray menu can stop auto
+accept too. No accept action is sent if Dota loses focus, the frame becomes stale,
+or modifier keys are held. It does not start matchmaking or operate in the
+background while another app is active.
+
+Install the optional shortcut: `python3 scripts/install_autoaccept_shortcut.py`.
+It requires the existing system Tesseract with English data, PyQt6, X11/XTest,
+Spectacle and KDE. The installer refuses occupied shortcuts; on the development
+machine Meta+F10 was reassigned from KDE's overview, preserving its other keys.
+No system packages are installed by this feature.
+
+Validation: the supplied 5120×1388 accept screenshot, synthetic OCR rejection
+cases, repeat/transition state tests, and Enter delivery to a separate XWayland
+test window. End-to-end acceptance in a live queue still needs confirmation.
