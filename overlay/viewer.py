@@ -20,7 +20,7 @@ class Adapter(QDBusAbstractAdaptor):
         return json.dumps({'active':self.parent().current, 'busy':self.parent().busy, 'visible':self.parent().isVisible()})
     @pyqtSlot()
     def beginDraft(self):
-        view=self.parent();view.lifetime.start(385000)
+        view=self.parent();view.lifetime.start(415000)
         view.paused=False;view.capture()
     @pyqtSlot()
     def stop(self):QApplication.quit()
@@ -51,7 +51,7 @@ class Overlay(QWidget):
         self.timeout=QTimer(self);self.timeout.setSingleShot(True);self.timeout.timeout.connect(self.expired)
         self.adaptor=Adapter(self)
         self.lifetime=QTimer(self);self.lifetime.setSingleShot(True)
-        self.lifetime.timeout.connect(QApplication.quit);self.lifetime.start(385000)
+        self.lifetime.timeout.connect(QApplication.quit);self.lifetime.start(415000)
     def status(self,text):
         self.tray.setToolTip('Ability Draft Overlay: '+text)
         (ROOT/'state/overlay-status.txt').write_text(text)

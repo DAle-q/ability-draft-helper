@@ -72,7 +72,7 @@ Older `test_core.py` and `gui_smoke.py` describe the pre-rollback API and need m
 
 ## Experimental overlay (KDE / XWayland, 5120×1440)
 
-Press **Meta+F9** to start a 385-second (6m25s) overlay session; press it again to stop. Alternatively use **Start overlay** in the screenshot helper, then return to Dota. Install the optional shortcut with `python3 scripts/install_overlay_shortcut.py`. The separate overlay process updates every 7 seconds while the Dota window is active. **Stop overlay** in the helper or the tray menu stops it; the tray also offers Pause.
+Press **Meta+F9** to start a 415-second (6m55s) overlay session; press it again to stop. Alternatively use **Start overlay** in the screenshot helper, then return to Dota. Install the optional shortcut with `python3 scripts/install_overlay_shortcut.py`. The separate overlay process updates every 7 seconds while the Dota window is active. **Stop overlay** in the helper or the tray menu stops it; the tray also offers Pause.
 
 - Only confirmed percentages are drawn. No `?`, frames, averages or editing controls are drawn over the game. Correct names in screenshot mode.
 - The transparent window does not accept input or keyboard focus. It hides when Dota loses focus ; previous percentages remain visible during capture and recognition, then update together. A shared capture lock prevents clashes with Meta+F8.
@@ -92,7 +92,7 @@ window and looks for the English **ACCEPT** button, its green background and the
 It continues waiting if other players fail to accept and matchmaking resumes.
 
 After two consecutive draft-board detections, auto accept stops and starts (or
-rearms) the existing 385-second overlay session. **Win+F9** still controls the
+rearms) the existing 415-second overlay session. **Win+F9** still controls the
 overlay and **Win+F8** still captures screenshots. The tray menu can stop auto
 accept too. No accept action is sent if Dota loses focus, the frame becomes stale,
 or modifier keys are held. It does not start matchmaking or operate in the
