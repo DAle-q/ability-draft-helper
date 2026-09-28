@@ -112,7 +112,8 @@ class App:
         ttk.Label(popup,text='Guess: '+r['name'],padding=8).pack()
         var=tk.StringVar();entry=ttk.Entry(popup,textvariable=var);entry.pack(fill='x',padx=12);entry.focus()
         listing=tk.Listbox(popup);listing.pack(fill='both',expand=True,padx=12,pady=8)
-        rows=self.engine.groups[r['hero']][0];shown=[]
+        # Multiple portrait templates belong to one selectable hero identity.
+        rows=list({row['abilityId']:row for row in self.engine.groups[r['hero']][0]}.values());shown=[]
         def refresh(*args):
             shown[:]=sorted([row for row in rows if var.get().lower() in row['name'].lower()],key=lambda row:row['name']);listing.delete(0,'end')
             for row in shown:listing.insert('end',f"{row['name']} — {row['winrate']*100:.1f}%")
