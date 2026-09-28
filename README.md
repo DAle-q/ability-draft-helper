@@ -107,3 +107,18 @@ No system packages are installed by this feature.
 Validation: the supplied 5120×1388 accept screenshot, synthetic OCR rejection
 cases, repeat/transition state tests, and Enter delivery to a separate XWayland
 test window. End-to-end acceptance in a live queue still needs confirmation.
+
+### In-game hero portraits
+
+Hero matching also uses 126 labelled portrait crops from the supplied hero-selection
+screenshot (2026-09-28). The manifest is `data/hero-portraits.json`; only portrait
+crops, not the full screenshot, are included. Several crops of each portrait are
+compared to account for framing. Alternative appearances are grouped by hero ID
+before calculating confidence. Win rates still come from the existing local
+Windrun snapshot; this change does not refresh statistics.
+
+On twelve separate draft-icon crops, nine pass the existing confidence threshold
+without learned corrections (previous official portraits: zero on these crops).
+All twelve top candidates are correct; Bristleback, Rubick and Lion still require
+manual confirmation in this fixture. Screenshot-mode corrections continue to save
+automatically. Ability templates, capture coordinates and the grid are unchanged.

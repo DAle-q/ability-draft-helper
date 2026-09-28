@@ -1,0 +1,884 @@
+[
+  {
+    "abilityId": -73,
+    "path": "assets/hero-portraits/alchemist.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 0
+  },
+  {
+    "abilityId": -2,
+    "path": "assets/hero-portraits/axe.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 1
+  },
+  {
+    "abilityId": -96,
+    "path": "assets/hero-portraits/centaur.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 3
+  },
+  {
+    "abilityId": -81,
+    "path": "assets/hero-portraits/chaos_knight.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 4
+  },
+  {
+    "abilityId": -51,
+    "path": "assets/hero-portraits/rattletrap.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 5
+  },
+  {
+    "abilityId": -1,
+    "path": "assets/hero-portraits/antimage.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 6
+  },
+  {
+    "abilityId": -4,
+    "path": "assets/hero-portraits/bloodseeker.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 7
+  },
+  {
+    "abilityId": -62,
+    "path": "assets/hero-portraits/bounty_hunter.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 8
+  },
+  {
+    "abilityId": -61,
+    "path": "assets/hero-portraits/broodmother.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 9
+  },
+  {
+    "abilityId": -56,
+    "path": "assets/hero-portraits/clinkz.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 10
+  },
+  {
+    "abilityId": -6,
+    "path": "assets/hero-portraits/drow_ranger.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 11
+  },
+  {
+    "abilityId": -68,
+    "path": "assets/hero-portraits/ancient_apparition.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 12
+  },
+  {
+    "abilityId": -66,
+    "path": "assets/hero-portraits/chen.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 13
+  },
+  {
+    "abilityId": -5,
+    "path": "assets/hero-portraits/crystal_maiden.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 14
+  },
+  {
+    "abilityId": -55,
+    "path": "assets/hero-portraits/dark_seer.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 15
+  },
+  {
+    "abilityId": -119,
+    "path": "assets/hero-portraits/dark_willow.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 16
+  },
+  {
+    "abilityId": -87,
+    "path": "assets/hero-portraits/disruptor.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 17
+  },
+  {
+    "abilityId": -102,
+    "path": "assets/hero-portraits/abaddon.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 18
+  },
+  {
+    "abilityId": -113,
+    "path": "assets/hero-portraits/arc_warden.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 19
+  },
+  {
+    "abilityId": -3,
+    "path": "assets/hero-portraits/bane.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 20
+  },
+  {
+    "abilityId": -99,
+    "path": "assets/hero-portraits/bristleback.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 0,
+    "column": 21
+  },
+  {
+    "abilityId": -135,
+    "path": "assets/hero-portraits/dawnbreaker.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 0
+  },
+  {
+    "abilityId": -69,
+    "path": "assets/hero-portraits/doom_bringer.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 1
+  },
+  {
+    "abilityId": -49,
+    "path": "assets/hero-portraits/dragon_knight.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 2
+  },
+  {
+    "abilityId": -107,
+    "path": "assets/hero-portraits/earth_spirit.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 3
+  },
+  {
+    "abilityId": -7,
+    "path": "assets/hero-portraits/earthshaker.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 4
+  },
+  {
+    "abilityId": -103,
+    "path": "assets/hero-portraits/elder_titan.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 5
+  },
+  {
+    "abilityId": -106,
+    "path": "assets/hero-portraits/ember_spirit.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 6
+  },
+  {
+    "abilityId": -41,
+    "path": "assets/hero-portraits/faceless_void.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 7
+  },
+  {
+    "abilityId": -72,
+    "path": "assets/hero-portraits/gyrocopter.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 8
+  },
+  {
+    "abilityId": -123,
+    "path": "assets/hero-portraits/hoodwink.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 9
+  },
+  {
+    "abilityId": -8,
+    "path": "assets/hero-portraits/juggernaut.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 10
+  },
+  {
+    "abilityId": -145,
+    "path": "assets/hero-portraits/kez.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 11
+  },
+  {
+    "abilityId": -58,
+    "path": "assets/hero-portraits/enchantress.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 12
+  },
+  {
+    "abilityId": -121,
+    "path": "assets/hero-portraits/grimstroke.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 13
+  },
+  {
+    "abilityId": -74,
+    "path": "assets/hero-portraits/invoker.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 14
+  },
+  {
+    "abilityId": -64,
+    "path": "assets/hero-portraits/jakiro.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 15
+  },
+  {
+    "abilityId": -90,
+    "path": "assets/hero-portraits/keeper_of_the_light.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 16
+  },
+  {
+    "abilityId": -52,
+    "path": "assets/hero-portraits/leshrac.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 17
+  },
+  {
+    "abilityId": -38,
+    "path": "assets/hero-portraits/beastmaster.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 18
+  },
+  {
+    "abilityId": -78,
+    "path": "assets/hero-portraits/brewmaster.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 19
+  },
+  {
+    "abilityId": -50,
+    "path": "assets/hero-portraits/dazzle.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 20
+  },
+  {
+    "abilityId": -43,
+    "path": "assets/hero-portraits/death_prophet.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 1,
+    "column": 21
+  },
+  {
+    "abilityId": -59,
+    "path": "assets/hero-portraits/huskar.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 0
+  },
+  {
+    "abilityId": -23,
+    "path": "assets/hero-portraits/kunkka.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 1
+  },
+  {
+    "abilityId": -155,
+    "path": "assets/hero-portraits/largo.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 2
+  },
+  {
+    "abilityId": -104,
+    "path": "assets/hero-portraits/legion_commander.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 3
+  },
+  {
+    "abilityId": -54,
+    "path": "assets/hero-portraits/life_stealer.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 4
+  },
+  {
+    "abilityId": -97,
+    "path": "assets/hero-portraits/magnataur.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 5
+  },
+  {
+    "abilityId": -80,
+    "path": "assets/hero-portraits/lone_druid.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 6
+  },
+  {
+    "abilityId": -48,
+    "path": "assets/hero-portraits/luna.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 7
+  },
+  {
+    "abilityId": -94,
+    "path": "assets/hero-portraits/medusa.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 8
+  },
+  {
+    "abilityId": -82,
+    "path": "assets/hero-portraits/meepo.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 9
+  },
+  {
+    "abilityId": -9,
+    "path": "assets/hero-portraits/mirana.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 10
+  },
+  {
+    "abilityId": -114,
+    "path": "assets/hero-portraits/monkey_king.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 11
+  },
+  {
+    "abilityId": -31,
+    "path": "assets/hero-portraits/lich.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 12
+  },
+  {
+    "abilityId": -25,
+    "path": "assets/hero-portraits/lina.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 13
+  },
+  {
+    "abilityId": -26,
+    "path": "assets/hero-portraits/lion.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 14
+  },
+  {
+    "abilityId": -138,
+    "path": "assets/hero-portraits/muerta.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 15
+  },
+  {
+    "abilityId": -36,
+    "path": "assets/hero-portraits/necrolyte.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 16
+  },
+  {
+    "abilityId": -111,
+    "path": "assets/hero-portraits/oracle.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 17
+  },
+  {
+    "abilityId": -33,
+    "path": "assets/hero-portraits/enigma.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 18
+  },
+  {
+    "abilityId": -91,
+    "path": "assets/hero-portraits/wisp.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 19
+  },
+  {
+    "abilityId": -77,
+    "path": "assets/hero-portraits/lycan.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 20
+  },
+  {
+    "abilityId": -136,
+    "path": "assets/hero-portraits/marci.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 2,
+    "column": 21
+  },
+  {
+    "abilityId": -129,
+    "path": "assets/hero-portraits/mars.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 0
+  },
+  {
+    "abilityId": -60,
+    "path": "assets/hero-portraits/night_stalker.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 1
+  },
+  {
+    "abilityId": -84,
+    "path": "assets/hero-portraits/ogre_magi.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 2
+  },
+  {
+    "abilityId": -57,
+    "path": "assets/hero-portraits/omniknight.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 3
+  },
+  {
+    "abilityId": -110,
+    "path": "assets/hero-portraits/phoenix.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 4
+  },
+  {
+    "abilityId": -137,
+    "path": "assets/hero-portraits/primal_beast.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 5
+  },
+  {
+    "abilityId": -10,
+    "path": "assets/hero-portraits/morphling.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 6
+  },
+  {
+    "abilityId": -89,
+    "path": "assets/hero-portraits/naga_siren.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 7
+  },
+  {
+    "abilityId": -44,
+    "path": "assets/hero-portraits/phantom_assassin.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 8
+  },
+  {
+    "abilityId": -12,
+    "path": "assets/hero-portraits/phantom_lancer.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 9
+  },
+  {
+    "abilityId": -15,
+    "path": "assets/hero-portraits/razor.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 10
+  },
+  {
+    "abilityId": -32,
+    "path": "assets/hero-portraits/riki.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 11
+  },
+  {
+    "abilityId": -76,
+    "path": "assets/hero-portraits/obsidian_destroyer.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 12
+  },
+  {
+    "abilityId": -13,
+    "path": "assets/hero-portraits/puck.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 13
+  },
+  {
+    "abilityId": -45,
+    "path": "assets/hero-portraits/pugna.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 14
+  },
+  {
+    "abilityId": -39,
+    "path": "assets/hero-portraits/queenofpain.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 15
+  },
+  {
+    "abilityId": -131,
+    "path": "assets/hero-portraits/ringmaster.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 16
+  },
+  {
+    "abilityId": -86,
+    "path": "assets/hero-portraits/rubick.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 17
+  },
+  {
+    "abilityId": -53,
+    "path": "assets/hero-portraits/furion.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 18
+  },
+  {
+    "abilityId": -88,
+    "path": "assets/hero-portraits/nyx_assassin.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 19
+  },
+  {
+    "abilityId": -120,
+    "path": "assets/hero-portraits/pangolier.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 20
+  },
+  {
+    "abilityId": -16,
+    "path": "assets/hero-portraits/sand_king.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 3,
+    "column": 21
+  },
+  {
+    "abilityId": -14,
+    "path": "assets/hero-portraits/pudge.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 0
+  },
+  {
+    "abilityId": -28,
+    "path": "assets/hero-portraits/slardar.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 1
+  },
+  {
+    "abilityId": -71,
+    "path": "assets/hero-portraits/spirit_breaker.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 2
+  },
+  {
+    "abilityId": -18,
+    "path": "assets/hero-portraits/sven.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 3
+  },
+  {
+    "abilityId": -29,
+    "path": "assets/hero-portraits/tidehunter.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 4
+  },
+  {
+    "abilityId": -98,
+    "path": "assets/hero-portraits/shredder.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 5
+  },
+  {
+    "abilityId": -11,
+    "path": "assets/hero-portraits/nevermore.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 6
+  },
+  {
+    "abilityId": -93,
+    "path": "assets/hero-portraits/slark.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 7
+  },
+  {
+    "abilityId": -35,
+    "path": "assets/hero-portraits/sniper.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 8
+  },
+  {
+    "abilityId": -67,
+    "path": "assets/hero-portraits/spectre.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 9
+  },
+  {
+    "abilityId": -46,
+    "path": "assets/hero-portraits/templar_assassin.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 10
+  },
+  {
+    "abilityId": -109,
+    "path": "assets/hero-portraits/terrorblade.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 11
+  },
+  {
+    "abilityId": -79,
+    "path": "assets/hero-portraits/shadow_demon.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 12
+  },
+  {
+    "abilityId": -27,
+    "path": "assets/hero-portraits/shadow_shaman.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 13
+  },
+  {
+    "abilityId": -75,
+    "path": "assets/hero-portraits/silencer.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 14
+  },
+  {
+    "abilityId": -101,
+    "path": "assets/hero-portraits/skywrath_mage.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 15
+  },
+  {
+    "abilityId": -17,
+    "path": "assets/hero-portraits/storm_spirit.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 16
+  },
+  {
+    "abilityId": -34,
+    "path": "assets/hero-portraits/tinker.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 17
+  },
+  {
+    "abilityId": -128,
+    "path": "assets/hero-portraits/snapfire.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 18
+  },
+  {
+    "abilityId": -105,
+    "path": "assets/hero-portraits/techies.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 19
+  },
+  {
+    "abilityId": -40,
+    "path": "assets/hero-portraits/venomancer.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 20
+  },
+  {
+    "abilityId": -92,
+    "path": "assets/hero-portraits/visage.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 4,
+    "column": 21
+  },
+  {
+    "abilityId": -19,
+    "path": "assets/hero-portraits/tiny.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 0
+  },
+  {
+    "abilityId": -83,
+    "path": "assets/hero-portraits/treant.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 1
+  },
+  {
+    "abilityId": -100,
+    "path": "assets/hero-portraits/tusk.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 2
+  },
+  {
+    "abilityId": -108,
+    "path": "assets/hero-portraits/abyssal_underlord.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 3
+  },
+  {
+    "abilityId": -85,
+    "path": "assets/hero-portraits/undying.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 4
+  },
+  {
+    "abilityId": -42,
+    "path": "assets/hero-portraits/skeleton_king.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 5
+  },
+  {
+    "abilityId": -95,
+    "path": "assets/hero-portraits/troll_warlord.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 6
+  },
+  {
+    "abilityId": -70,
+    "path": "assets/hero-portraits/ursa.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 7
+  },
+  {
+    "abilityId": -20,
+    "path": "assets/hero-portraits/vengefulspirit.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 8
+  },
+  {
+    "abilityId": -47,
+    "path": "assets/hero-portraits/viper.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 9
+  },
+  {
+    "abilityId": -63,
+    "path": "assets/hero-portraits/weaver.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 10
+  },
+  {
+    "abilityId": -37,
+    "path": "assets/hero-portraits/warlock.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 12
+  },
+  {
+    "abilityId": -112,
+    "path": "assets/hero-portraits/winter_wyvern.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 13
+  },
+  {
+    "abilityId": -30,
+    "path": "assets/hero-portraits/witch_doctor.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 14
+  },
+  {
+    "abilityId": -22,
+    "path": "assets/hero-portraits/zuus.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 15
+  },
+  {
+    "abilityId": -126,
+    "path": "assets/hero-portraits/void_spirit.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 18
+  },
+  {
+    "abilityId": -21,
+    "path": "assets/hero-portraits/windrunner.png",
+    "source": "user hero-selection screenshot 2026-09-28",
+    "row": 5,
+    "column": 19
+  }
+]

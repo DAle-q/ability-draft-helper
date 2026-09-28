@@ -61,6 +61,12 @@ class Recognizer:
         for hero in [False,True]:
             entries=[m for m in manifest if m['status']=='ok' and (m['abilityId']<0)==hero]
             self.groups[hero]=([rows[m['abilityId']] for m in entries],np.stack([feature(Image.open(ROOT/m['path'])) for m in entries]))
+        from hero_templates import load_portraits
+        extra_rows,extra_templates=load_portraits(ROOT,rows,feature)
+        if extra_rows:
+            old_rows,old_templates=self.groups[True]
+            self.groups[True]=(old_rows+extra_rows,np.concatenate((old_templates,np.stack(extra_templates))))
+
     def learn(self, im, result, ident):
         scale=im.width/2048
         x,y=result['x'],result['y']
@@ -82,7 +88,15 @@ class Recognizer:
                     crops.append(feature(im.crop(box)));boxes.append(box)
             samples=np.stack(crops)
             distances=((samples[:,None,:]-templates[None,:,:])**2).mean(axis=2)
-            best=distances.min(axis=0); order=np.argsort(best); idx=int(order[0]); score=float(best[idx]);margin=float(best[order[1]]-score)
+            best=distances.min(axis=0)
+            if hero:
+                # Competing appearances of the SAME hero are not runner-up heroes.
+                unique={}
+                for i,row in enumerate(rows):
+                    ident=row['abilityId']
+                    if ident not in unique or best[i]<best[unique[ident]]:unique[ident]=i
+                indices=list(unique.values());rows=[rows[i] for i in indices];best=best[indices]
+            order=np.argsort(best); idx=int(order[0]); score=float(best[idx]);margin=float(best[order[1]]-score)
             row=rows[idx]
             brightness=np.asarray(im.crop((x-18*scale,y-18*scale,x+18*scale,y+18*scale))).mean()/255
             accepted=score<(.22 if hero else .30) and margin>.065 and brightness>.07
