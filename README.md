@@ -1,6 +1,14 @@
 # Dota 2 Ability Draft Helper
 
-Offline screenshot recognition for Dota 2 Ability Draft: ability and hero win rates from cached Windrun statistics, player build averages, and saved manual icon corrections. English desktop UI. Developed and tested on Linux KDE with a 5120×1440 game window.
+Dota 2 Ability Draft helper with screenshot recognition, a live win-rate overlay, and optional auto accept. Uses cached Windrun statistics for abilities and heroes, shows player build averages, and remembers manual icon corrections. English desktop UI. Developed and tested on Linux KDE with a 5120×1440 game window.
+
+## Main shortcuts
+
+- **Win+F8** — capture the draft and open or update the screenshot helper.
+- **Win+F9** — toggle the click-through win-rate overlay; updates every 7 seconds for 6 minutes 55 seconds.
+- **Win+F10** — toggle auto accept: checks for the Ability Draft acceptance dialog every 5 seconds and presses Enter. Keeps waiting if other players fail to accept, then automatically starts the overlay when the draft is detected. Dota must remain active.
+
+See the setup and requirements for each mode below.
 
 ## Screenshots
 
