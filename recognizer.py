@@ -53,7 +53,7 @@ def slots(w,h):
 class Recognizer:
     def __init__(self, learned_dir=None):
         self.learning=Learning(learned_dir or ROOT/'data/learned-icons')
-        data=json.loads((ROOT/'data/windrun-7.41d.json').read_text())
+        data=json.loads((ROOT/'data/windrun-7.41f.json').read_text())
         manifest=json.loads((ROOT/'data/icon-manifest.json').read_text())
         rows={r['abilityId']:r for r in data['abilityStats']}
         self.rows=rows

@@ -23,7 +23,7 @@ class App:
         self.savebutton=ttk.Button(bar,text='Save PNG',command=self.save,state='disabled');self.savebutton.pack(side='left',padx=10)
         ttk.Button(bar,text='Start overlay',command=self.start_overlay).pack(side='left',padx=6)
         ttk.Button(bar,text='Stop overlay',command=self.stop_overlay).pack(side='left')
-        ttk.Label(bar,text='Windrun · 7.41d · overall win rate').pack(side='right')
+        ttk.Label(bar,text='Windrun · 7.41f · overall win rate').pack(side='right')
         self.status=tk.StringVar(value='Open a draft screenshot. Click an icon to correct its name.')
         ttk.Label(root,textvariable=self.status,padding=8).pack(fill='x')
         self.canvas=tk.Canvas(root,bg='#121923',highlightthickness=0);self.canvas.pack(fill='both',expand=True)

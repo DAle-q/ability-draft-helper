@@ -63,7 +63,7 @@ The tool is experimental. Check uncertain or surprising matches by clicking the 
 
 ## Data and backups
 
-Statistics are a cached Windrun **7.41d** snapshot; updates are manual. Normal recognition works offline. Ability icons come from Valve's Dota image CDN. Dota 2 and its artwork belong to Valve; this is an unofficial community project.
+Statistics are a cached Windrun **7.41f** snapshot; updates are manual. Normal recognition works offline. Ability icons come from Valve's Dota image CDN. Dota 2 and its artwork belong to Valve; this is an unofficial community project.
 
 - [Windrun statistics](https://windrun.io/abilities)
 - [Valve image CDN](https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/)

@@ -41,7 +41,7 @@ def download(row):
         return {**result, 'status': 'error', 'error': str(exc)}
 
 if __name__ == '__main__':
-    data = json.loads((ROOT / 'data/windrun-7.41d.json').read_text())
+    data = json.loads((ROOT / 'data/windrun-7.41f.json').read_text())
     with concurrent.futures.ThreadPoolExecutor(max_workers=8) as pool:
         results = list(pool.map(download, data['abilityStats']))
     (ROOT / 'data/icon-manifest.json').write_text(json.dumps(results, ensure_ascii=False, indent=2))
